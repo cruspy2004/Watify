@@ -139,76 +139,105 @@ npm run dev
 
 - **Email**: Create your account through the registration process
 - **Password**: Set during registration
-1. Create a PostgreSQL database named `wateen_watify`
-2. Update the database credentials in `.env` file:
+## 📊 API Endpoints
 
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - User login
+- `GET /api/auth/profile` - Get user profile
+
+### WhatsApp Management
+- `GET /api/whatsapp/status` - Get WhatsApp connection status
+- `GET /api/whatsapp/qr` - Get QR code for authentication
+- `GET /api/whatsapp/groups` - Get all WhatsApp groups
+- `POST /api/whatsapp/send-message` - Send single message
+- `POST /api/whatsapp/send-to-group` - Send bulk messages to group
+
+### Group Management
+- `GET /api/groups` - Get all groups with pagination
+- `POST /api/groups` - Create new group
+- `PUT /api/groups/:id` - Update group
+- `DELETE /api/groups/:id` - Delete group
+
+## 🔧 Development
+
+### Running Tests
 ```bash
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=wateen_watify
-DB_USER=your_username
-DB_PASSWORD=your_password
-DATABASE_URL=postgresql://your_username:your_password@localhost:5432/wateen_watify
+# Backend tests
+cd backend
+npm test
+
+# Frontend tests
+cd frontend
+npm test
 ```
 
-### 3. Environment Variables
-Update the `.env` file with your configuration:
+### Database Migrations
 ```bash
-# Server Configuration
-PORT=5000
-NODE_ENV=development
+# Run migrations
+cd backend
+npm run migrate
 
-# JWT Configuration (IMPORTANT: Change this to a secure secret)
-JWT_SECRET=your_super_secret_jwt_key_here
-JWT_EXPIRE=7d
-
-# Frontend URL
-CLIENT_URL=http://localhost:3000
+# Rollback migrations
+npm run migrate:rollback
 ```
 
-### 4. Start the Development Server
-```bash
-# Start backend server with auto-reload
-npm run dev
+## 🚀 Deployment
 
-# Or start without auto-reload
-npm start
+### Using Docker (Recommended)
+```bash
+# Build and run with Docker Compose
+docker-compose up --build -d
 ```
 
-The server will start on `http://localhost:5000`
+### Manual Deployment
+1. Set `NODE_ENV=production` in environment
+2. Build frontend: `cd frontend && npm run build`
+3. Configure PostgreSQL production database
+4. Set up reverse proxy (nginx recommended)
+5. Configure SSL certificates
+6. Start with PM2: `pm2 start backend/server.js`
 
-## 📚 API Endpoints
+## �️ Security Features
 
-### Authentication Routes (`/api/auth`)
+- JWT-based authentication
+- Password hashing with bcrypt
+- CORS protection
+- Helmet security headers
+- Rate limiting for API endpoints
+- Input validation and sanitization
 
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
-| POST | `/api/auth/register` | Register new user | Public |
-| POST | `/api/auth/login` | Login user | Public |
-| GET | `/api/auth/profile` | Get user profile | Private |
+## 📝 Contributing
 
-### Example API Usage
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-#### Register User
-```bash
-POST /api/auth/register
-Content-Type: application/json
+## 📄 License
 
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "password123"
-}
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-#### Login User
-```bash
-POST /api/auth/login
-Content-Type: application/json
+## 🆘 Support
 
-{
-  "email": "john@example.com",
+If you encounter any issues:
+
+1. Check the [Issues](https://github.com/cruspy2004/Watify/issues) page
+2. Create a new issue with detailed information
+3. Include logs and error messages
+
+## 🔗 Links
+
+- **Live Demo**: [Coming Soon]
+- **Documentation**: [API Documentation](https://github.com/cruspy2004/Watify/wiki)
+- **Support**: [Issues Page](https://github.com/cruspy2004/Watify/issues)
+
+---
+
+**⭐ Star this repository if you find it helpful!**
+
+Built with ❤️ by [cruspy2004](https://github.com/cruspy2004)
   "password": "password123"
 }
 ```
