@@ -11,7 +11,7 @@ import {
   Chip
 } from '@mui/material';
 import { apiService } from '../services/api';
-import { API_CONFIG } from '../utils/config';
+import { API_CONFIG, APP_CONFIG } from '../utils/config';
 
 const Home = () => {
   const [backendStatus, setBackendStatus] = useState('checking');
