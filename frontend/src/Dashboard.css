@@ -1,0 +1,385 @@
+/* Dashboard Enhanced Styling */
+
+/* Floating Animations */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  33% { 
+    transform: translateY(-15px) rotate(2deg); 
+  }
+  66% { 
+    transform: translateY(-5px) rotate(-1deg); 
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1; 
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  50% { 
+    opacity: 0.8; 
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dashboard Background Enhancement */
+.dashboard-background {
+  /* Background color managed by theme context */
+  position: relative;
+  min-height: 100vh;
+}
+
+.dashboard-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(76, 175, 80, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(33, 150, 243, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Floating Decorative Elements */
+.floating-element {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: float 6s ease-in-out infinite;
+  z-index: 0;
+}
+
+.floating-element.green {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+  top: 10%;
+  right: 10%;
+  width: 100px;
+  height: 100px;
+}
+
+.floating-element.blue {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%);
+  bottom: 20%;
+  left: 5%;
+  width: 80px;
+  height: 80px;
+  animation-delay: -2s;
+  animation-direction: reverse;
+}
+
+/* Enhanced Card Styling */
+.enhanced-stat-card {
+  transition: all 0.3s ease;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.enhanced-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.enhanced-stat-card:hover::before {
+  transform: translateX(100%);
+}
+
+.enhanced-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Sidebar Enhancements */
+.sidebar-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: float 20s linear infinite;
+}
+
+.logo-container {
+  transition: all 0.3s ease-in-out;
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+}
+
+.logo-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Menu Item Enhancements */
+.menu-item {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin: 4px 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05));
+  transition: width 0.3s ease;
+}
+
+.menu-item:hover::before {
+  width: 100%;
+}
+
+.menu-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+}
+
+.menu-item.active {
+  background: rgba(76, 175, 80, 0.15);
+  border-right: 4px solid #4CAF50;
+}
+
+/* Chart Enhancements */
+.circular-chart {
+  position: relative;
+  animation: slideInUp 0.8s ease-out;
+}
+
+.circular-chart::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  z-index: -1;
+}
+
+/* Status Indicators */
+.status-indicator {
+  border-radius: 50%;
+  position: relative;
+}
+
+.status-indicator.online {
+  background: #4CAF50;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.online::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  animation: pulse 2s infinite 0.5s;
+}
+
+/* Progress Bar Enhancements */
+.progress-enhanced {
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.progress-enhanced::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%
+  );
+  background-size: 20px 20px;
+  animation: float 2s linear infinite;
+}
+
+/* Glassmorphism Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Interactive Elements */
+.interactive-element {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.interactive-element:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+/* Dashboard Content Animation */
+.dashboard-content {
+  animation: slideInUp 0.6s ease-out;
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .floating-element {
+    display: none;
+  }
+  
+  .enhanced-stat-card {
+    border-radius: 12px;
+  }
+  
+  .menu-item:hover {
+    transform: none;
+  }
+  
+  .dashboard-content {
+    padding: 16px;
+  }
+}
+
+/* Dark mode styles now managed by theme context, not system preference */
+
+/* Accessibility Enhancements */
+.focus-visible {
+  outline: 2px solid #4CAF50;
+  outline-offset: 2px;
+}
+
+/* Loading States */
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: float 2s infinite;
+}
+
+/* Success States */
+.success-glow {
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Enhanced Typography */
+.gradient-text {
+  background: linear-gradient(135deg, #1976d2 0%, #4CAF50 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 800;
+}
+
+/* Button Enhancements */
+.btn-enhanced {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.btn-enhanced:hover::before {
+  transform: translateX(100%);
+}
+
+.btn-enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* Scrollbar Styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #45a049, #388e3c);
+} 

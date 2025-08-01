@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug API Test</h1>
+    
+    <div class="container">
+        <h3>🔐 Authentication</h3>
+        <input type="email" id="email" placeholder="Email" value="alihassan.iqbal101@gmail.com">
+        <input type="password" id="password" placeholder="Password" value="ah2003ah">
+        <button onclick="testLogin()">Login</button>
+        <button onclick="clearToken()">Clear Token</button>
+        <div id="login-result"></div>
+    </div>
+
+    <div class="container">
+        <h3>📋 Group Fetching</h3>
+        <button onclick="fetchGroups()">Fetch Groups</button>
+        <button onclick="fetchGroupOptions()">Fetch Group Options</button>
+        <div id="groups-result"></div>
+    </div>
+
+    <div class="container">
+        <h3>📱 WhatsApp Status</h3>
+        <button onclick="checkWhatsAppStatus()">Check Status</button>
+        <div id="whatsapp-result"></div>
+    </div>
+
+    <div class="container">
+        <h3>📤 Send Message Test</h3>
+        <input type="text" id="test-number" placeholder="Test Number (e.g., +923125331072)" value="+923125331072">
+        <textarea id="test-message" placeholder="Test Message">Hello from Debug Test!</textarea>
+        <button onclick="sendTestMessage()">Send Individual Message</button>
+        <div id="message-result"></div>
+    </div>
+
+    <div class="container">
+        <h3>📊 Debug Info</h3>
+        <button onclick="showDebugInfo()">Show Debug Info</button>
+        <div id="debug-info"></div>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            element.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function makeApiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const token = localStorage.getItem('token');
+                const config = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                if (token) {
+                    config.headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                if (data) {
+                    config.body = JSON.stringify(data);
+                }
+
+                console.log(`Making API call: ${method} ${endpoint}`);
+                console.log('Token available:', !!token);
+                console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
+                console.log('Request data:', data);
+
+                const response = await fetch(endpoint, config);
+                
+                let result;
+                const contentType = response.headers.get('content-type');
+                
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    const text = await response.text();
+                    result = { error: 'Non-JSON response', text: text };
+                }
+
+                console.log('API Response:', { 
+                    status: response.status, 
+                    ok: response.ok,
+                    contentType: contentType,
+                    result: result 
+                });
+
+                return { response, result };
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        async function testLogin() {
+            clearLog('login-result');
+            try {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                log('login-result', `Attempting login with ${email}...`);
+
+                const { response, result } = await makeApiCall('/api/auth/login', 'POST', { email, password });
+
+                console.log('Login response:', result); // Debug log
+
+                if (response.ok && result.success) {
+                    // Handle different possible token locations
+                    const token = result.token || result.data?.token;
+                    
+                    if (token) {
+                        localStorage.setItem('token', token);
+                        log('login-result', '✅ Login successful!', 'success');
+                        log('login-result', `Token: ${token.substring(0, 50)}...`, 'info');
+                        
+                        if (result.data?.user) {
+                            log('login-result', `User: ${result.data.user.name} (${result.data.user.role})`, 'info');
+                        }
+                        
+                        // Now test fetching groups automatically
+                        setTimeout(fetchGroups, 1000);
+                    } else {
+                        log('login-result', '❌ Login successful but no token received', 'error');
+                        log('login-result', `Response structure: ${JSON.stringify(result, null, 2)}`, 'info');
+                    }
+                } else {
+                    log('login-result', `❌ Login failed: ${result.message || result.error || 'Unknown error'}`, 'error');
+                    log('login-result', `Response: ${JSON.stringify(result, null, 2)}`, 'info');
+                }
+            } catch (error) {
+                log('login-result', `❌ Login error: ${error.message}`, 'error');
+                console.error('Login exception:', error);
+            }
+        }
+
+        function clearToken() {
+            localStorage.removeItem('token');
+            log('login-result', 'Token cleared', 'info');
+        }
+
+        async function fetchGroups() {
+            clearLog('groups-result');
+            try {
+                log('groups-result', 'Fetching WhatsApp groups...');
+                const { response, result } = await makeApiCall('/api/whatsapp-groups');
+
+                if (response.ok && result.success) {
+                    log('groups-result', `✅ Groups fetched: ${result.data.length} groups found`, 'success');
+                    log('groups-result', `<pre>${JSON.stringify(result.data.slice(0, 3), null, 2)}</pre>`, 'info');
+                } else {
+                    log('groups-result', `❌ Failed to fetch groups: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                log('groups-result', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function fetchGroupOptions() {
+            clearLog('groups-result');
+            try {
+                log('groups-result', 'Fetching group options...');
+                const { response, result } = await makeApiCall('/api/whatsapp-groups/options');
+
+                if (response.ok && result.success) {
+                    log('groups-result', `✅ Group options fetched: ${result.data.length} options found`, 'success');
+                    log('groups-result', `<pre>${JSON.stringify(result.data.slice(0, 3), null, 2)}</pre>`, 'info');
+                } else {
+                    log('groups-result', `❌ Failed to fetch group options: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                log('groups-result', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkWhatsAppStatus() {
+            clearLog('whatsapp-result');
+            try {
+                log('whatsapp-result', 'Checking WhatsApp status...');
+                const { response, result } = await makeApiCall('/api/whatsapp/status');
+
+                if (response.ok && result.status === 'success') {
+                    const { isReady, isAuthenticated, hasQR, clientInfo } = result.data;
+                    log('whatsapp-result', `✅ WhatsApp Status:`, 'success');
+                    log('whatsapp-result', `   Ready: ${isReady}`, 'info');
+                    log('whatsapp-result', `   Authenticated: ${isAuthenticated}`, 'info');
+                    log('whatsapp-result', `   Has QR: ${hasQR}`, 'info');
+                    if (clientInfo) {
+                        log('whatsapp-result', `   User: ${clientInfo.pushname}`, 'info');
+                    }
+                } else {
+                    log('whatsapp-result', `❌ WhatsApp status error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                log('whatsapp-result', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function sendTestMessage() {
+            clearLog('message-result');
+            try {
+                const number = document.getElementById('test-number').value;
+                const message = document.getElementById('test-message').value;
+
+                if (!number || !message) {
+                    log('message-result', '❌ Please enter both number and message', 'error');
+                    return;
+                }
+
+                log('message-result', `Sending message to ${number}...`);
+                const { response, result } = await makeApiCall('/api/whatsapp/send-message', 'POST', { number, message });
+
+                if (response.ok && result.status === 'success') {
+                    log('message-result', `✅ Message sent successfully!`, 'success');
+                    log('message-result', `Response: ${result.message}`, 'info');
+                } else {
+                    log('message-result', `❌ Failed to send message: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                log('message-result', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function showDebugInfo() {
+            clearLog('debug-info');
+            const token = localStorage.getItem('token');
+            log('debug-info', `Current URL: ${window.location.href}`, 'info');
+            log('debug-info', `Token stored: ${token ? 'Yes' : 'No'}`, 'info');
+            if (token) {
+                log('debug-info', `Token: ${token.substring(0, 50)}...`, 'info');
+            }
+            log('debug-info', `User Agent: ${navigator.userAgent}`, 'info');
+        }
+
+        // Auto-show debug info on load
+        window.onload = () => {
+            showDebugInfo();
+        };
+    </script>
+</body>
+</html> 

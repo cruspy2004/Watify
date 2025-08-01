@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Storage - Wateen Watify</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .storage-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .found { border-left-color: #28a745; }
+        .missing { border-left-color: #dc3545; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .fix-btn { background: #28a745; }
+        .fix-btn:hover { background: #1e7e34; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 LocalStorage Debug - Wateen Watify</h1>
+        <p>This page helps diagnose authentication token issues.</p>
+        
+        <div id="storage-info">
+            <h3>Current Storage Status:</h3>
+        </div>
+        
+        <div>
+            <button onclick="checkStorage()">🔄 Refresh</button>
+            <button onclick="fixTokenMigration()" class="fix-btn">🔧 Fix Token Migration</button>
+            <button onclick="clearAllTokens()" style="background: #dc3545;">🗑️ Clear All</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function checkStorage() {
+            const container = document.getElementById('storage-info');
+            const results = document.getElementById('results');
+            
+            // Check for tokens
+            const oldToken = localStorage.getItem('token');
+            const newToken = localStorage.getItem('wateen_watify_token');
+            const oldUser = localStorage.getItem('user');
+            const newUser = localStorage.getItem('wateen_watify_user');
+            
+            let html = '';
+            
+            // Old token check
+            html += `<div class="storage-item ${oldToken ? 'found' : 'missing'}">
+                <strong>Old Token Key ('token'):</strong> ${oldToken ? '✅ FOUND' : '❌ Not found'}<br/>
+                ${oldToken ? `Preview: ${oldToken.substring(0, 30)}...` : ''}
+            </div>`;
+            
+            // New token check
+            html += `<div class="storage-item ${newToken ? 'found' : 'missing'}">
+                <strong>New Token Key ('wateen_watify_token'):</strong> ${newToken ? '✅ FOUND' : '❌ Not found'}<br/>
+                ${newToken ? `Preview: ${newToken.substring(0, 30)}...` : ''}
+            </div>`;
+            
+            // Old user check
+            html += `<div class="storage-item ${oldUser ? 'found' : 'missing'}">
+                <strong>Old User Key ('user'):</strong> ${oldUser ? '✅ FOUND' : '❌ Not found'}
+            </div>`;
+            
+            // New user check
+            html += `<div class="storage-item ${newUser ? 'found' : 'missing'}">
+                <strong>New User Key ('wateen_watify_user'):</strong> ${newUser ? '✅ FOUND' : '❌ Not found'}
+            </div>`;
+            
+            container.innerHTML = html;
+            
+            // Show diagnosis
+            let diagnosis = '<h3>🔧 Diagnosis:</h3>';
+            if (oldToken && !newToken) {
+                diagnosis += '<p style="color: orange;">⚠️ You have a token stored under the old key. Click "Fix Token Migration" to move it to the correct key.</p>';
+            } else if (newToken) {
+                diagnosis += '<p style="color: green;">✅ Token is stored correctly! Authentication should work.</p>';
+            } else {
+                diagnosis += '<p style="color: red;">❌ No authentication token found. You need to log in again.</p>';
+            }
+            
+            results.innerHTML = diagnosis;
+        }
+        
+        function fixTokenMigration() {
+            const oldToken = localStorage.getItem('token');
+            const oldUser = localStorage.getItem('user');
+            
+            if (oldToken) {
+                localStorage.setItem('wateen_watify_token', oldToken);
+                localStorage.removeItem('token');
+                console.log('✅ Token migrated from "token" to "wateen_watify_token"');
+            }
+            
+            if (oldUser) {
+                localStorage.setItem('wateen_watify_user', oldUser);
+                localStorage.removeItem('user');
+                console.log('✅ User migrated from "user" to "wateen_watify_user"');
+            }
+            
+            alert('✅ Token migration complete! Now go back to the app and try sending a message.');
+            checkStorage();
+        }
+        
+        function clearAllTokens() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('wateen_watify_token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('wateen_watify_user');
+            alert('🗑️ All tokens cleared. You will need to log in again.');
+            checkStorage();
+        }
+        
+        // Check storage on page load
+        checkStorage();
+    </script>
+</body>
+</html> 

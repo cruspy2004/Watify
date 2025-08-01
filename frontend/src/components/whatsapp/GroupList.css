@@ -1,0 +1,11 @@
+.group-list-container {
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.group-list-table-cell {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  max-width: 200px;
+} 
