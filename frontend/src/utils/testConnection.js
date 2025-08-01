@@ -1,4 +1,5 @@
 import { apiService } from '../services/api';
+import { API_CONFIG } from './config';
 
 /**
  * Test the connection between frontend and backend
@@ -14,7 +15,7 @@ export const testConnection = async () => {
   try {
     // Test health endpoint
     console.log('🔍 Testing health endpoint...');
-    const healthResponse = await fetch('http://localhost:5001/health');
+    const healthResponse = await fetch(`${API_CONFIG.BASE_URL}/health`);
     if (healthResponse.ok) {
       const healthData = await healthResponse.json();
       results.healthCheck = true;
