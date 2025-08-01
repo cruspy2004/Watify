@@ -28,8 +28,8 @@ import Settings from '../Settings';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: 'alihassan.iqbal101@gmail.com',
-    password: 'ah2003ah'
+    email: process.env.REACT_APP_DEFAULT_EMAIL || 'haadheesheeraz2004@gmail.com',
+    password: process.env.REACT_APP_DEFAULT_PASSWORD || 'admin123'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
