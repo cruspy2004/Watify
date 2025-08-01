@@ -226,7 +226,7 @@ const SendMessageComponent = () => {
 
       console.log('📤 Dashboard: Sending message...', { endpoint, requestData });
 
-      const response = await fetch(`http://localhost:5001${endpoint}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
