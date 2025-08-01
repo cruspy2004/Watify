@@ -31,7 +31,7 @@ export const testConnection = async () => {
   try {
     // Test welcome endpoint
     console.log('🔍 Testing welcome endpoint...');
-    const welcomeResponse = await fetch('http://localhost:5001/api');
+    const welcomeResponse = await fetch(`${API_CONFIG.BASE_URL}/api`);
     if (welcomeResponse.ok) {
       const welcomeData = await welcomeResponse.json();
       results.welcomeEndpoint = true;
@@ -82,7 +82,7 @@ export const testAuthEndpoints = async () => {
   
   try {
     // Test register endpoint with dummy data
-    const registerResponse = await fetch('http://localhost:5001/api/auth/register', {
+    const registerResponse = await fetch(`${API_CONFIG.BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
