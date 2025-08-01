@@ -171,15 +171,6 @@ export const whatsappGroupApi = {
     return handleResponse(response);
   },
 
-  // Get real WhatsApp groups from WhatsApp client
-  getRealWhatsAppGroups: async () => {
-    console.log('🔍 Fetching real WhatsApp groups from WhatsApp client...');
-    const response = await fetch('/api/whatsapp/groups/list', {
-      headers: getAuthHeaders()
-    });
-    return handleResponse(response);
-  },
-
   bulkUpdateMemberStatus: async (memberIds, status) => {
     const response = await fetch(`${API_BASE_URL}/members/bulk/status`, {
       method: 'PATCH',
