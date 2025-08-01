@@ -1,0 +1,34 @@
+-- Migration: 006_add_new_table.sql
+-- Description: Example migration - Add new feature table
+-- Created: 2025-06-28
+
+-- Create new_feature table
+CREATE TABLE IF NOT EXISTS new_feature (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_new_feature_name ON new_feature(name);
+CREATE INDEX IF NOT EXISTS idx_new_feature_status ON new_feature(status);
+CREATE INDEX IF NOT EXISTS idx_new_feature_user_id ON new_feature(user_id);
+CREATE INDEX IF NOT EXISTS idx_new_feature_created_at ON new_feature(created_at);
+
+-- Create trigger for updated_at timestamp
+CREATE TRIGGER update_new_feature_updated_at 
+    BEFORE UPDATE ON new_feature 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Add any additional constraints or data
+-- INSERT INTO new_feature (name, description) VALUES ('Example', 'This is an example record');
+
+-- Add comments to document the table
+COMMENT ON TABLE new_feature IS 'Table for storing new feature data';
+COMMENT ON COLUMN new_feature.metadata IS 'JSON metadata for flexible data storage'; 
