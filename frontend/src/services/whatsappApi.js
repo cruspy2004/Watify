@@ -268,6 +268,24 @@ export const whatsappGroupApi = {
       headers: getAuthHeaders()
     });
     return handleResponse(response);
+  },
+
+  // Get real WhatsApp groups from connected WhatsApp client
+  getRealWhatsAppGroups: async () => {
+    console.log('🔍 Fetching real WhatsApp groups...');
+    const response = await fetch(`${WHATSAPP_API_BASE_URL}/groups`, {
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+
+  // Get all WhatsApp chats (groups + individuals)
+  getWhatsAppChats: async () => {
+    console.log('🔍 Fetching WhatsApp chats...');
+    const response = await fetch(`${WHATSAPP_API_BASE_URL}/chats`, {
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
   }
 };
 
