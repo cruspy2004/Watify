@@ -71,6 +71,7 @@ import SearchMembers from '../components/whatsapp/SearchMembers';
 import SendMessage from '../components/messaging/SendMessage';
 import WhatsAppAuth from '../components/whatsapp/WhatsAppAuth';
 import { whatsappGroupApi } from '../services/whatsappApi';
+import { API_CONFIG } from '../utils/config';
 import EditGroupForm from '../components/whatsapp/EditGroupForm';
 import { useLocation } from 'react-router-dom';
 
