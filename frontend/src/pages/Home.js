@@ -11,7 +11,7 @@ import {
   Chip
 } from '@mui/material';
 import { apiService } from '../services/api';
-import { APP_CONFIG } from '../utils/config';
+import { API_CONFIG } from '../utils/config';
 
 const Home = () => {
   const [backendStatus, setBackendStatus] = useState('checking');
@@ -23,7 +23,7 @@ const Home = () => {
 
   const checkBackendConnection = async () => {
     try {
-      const response = await fetch('http://localhost:5001/health');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/health`);
       if (response.ok) {
         const data = await response.json();
         setBackendStatus('connected');
