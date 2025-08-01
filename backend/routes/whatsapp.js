@@ -364,11 +364,40 @@ router.get('/groups', authenticateToken, async (req, res) => {
     const chats = await whatsappService.getChats();
     // Filter only groups
     const groups = chats.filter(chat => chat.isGroup);
+    const individuals = chats.filter(chat => !chat.isGroup);
+    
+    // Get client info
+    const clientInfo = state.clientInfo || {};
+    
+    // Prepare statistics
+    const statistics = {
+      totalGroups: groups.length,
+      totalIndividualChats: individuals.length,
+      totalChats: chats.length,
+      unreadGroups: groups.filter(g => g.unreadCount > 0).length,
+      activeGroups: groups.filter(g => g.timestamp > 0).length
+    };
+    
+    // Prepare WhatsApp info
+    const whatsappInfo = {
+      isReady: state.isReady,
+      isAuthenticated: state.isAuthenticated,
+      user: {
+        name: clientInfo.pushname || 'Unknown',
+        phone: clientInfo.wid?.user || 'Unknown',
+        platform: clientInfo.platform || 'Unknown'
+      },
+      connectionStatus: state.state || 'unknown'
+    };
     
     res.json({
       status: 'success',
       message: 'WhatsApp groups fetched successfully',
-      data: groups
+      data: {
+        groups: groups,
+        statistics: statistics,
+        whatsappInfo: whatsappInfo
+      }
     });
   } catch (error) {
     console.error('Error getting WhatsApp groups:', error);
