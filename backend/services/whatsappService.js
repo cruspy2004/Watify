@@ -506,6 +506,258 @@ class WhatsAppService {
     }
 
     /**
+     * Get detailed group information including participants
+     * @param {string} groupId - WhatsApp group ID
+     */
+    async getGroupInfo(groupId) {
+        return await this.executeWithRetry(async () => {
+            if (!this.isReady) {
+                throw new Error('WhatsApp client is not ready. Please authenticate first.');
+            }
+
+            const chat = await client.getChatById(groupId);
+            
+            if (!chat.isGroup) {
+                throw new Error('Chat ID is not a group');
+            }
+
+            // Get participants with their details
+            const participants = chat.participants.map(participant => ({
+                id: participant.id._serialized,
+                isAdmin: participant.isAdmin,
+                isSuperAdmin: participant.isSuperAdmin
+            }));
+
+            // Get group metadata
+            return {
+                id: chat.id._serialized,
+                name: chat.name,
+                description: chat.description || '',
+                participants: participants,
+                participantCount: participants.length,
+                createdAt: chat.createdAt ? new Date(chat.createdAt * 1000) : null,
+                owner: chat.owner ? chat.owner._serialized : null,
+                isGroup: true,
+                admins: participants.filter(p => p.isAdmin || p.isSuperAdmin),
+                invite: null // Will be populated if invite link is available
+            };
+            
+        }, 3, `getGroupInfo for ${groupId}`);
+    }
+
+    /**
+     * Create a new WhatsApp group
+     * @param {string} groupName - Name of the group
+     * @param {string[]} participantNumbers - Array of phone numbers to add
+     */
+    async createWhatsAppGroup(groupName, participantNumbers) {
+        return await this.executeWithRetry(async () => {
+            if (!this.isReady) {
+                throw new Error('WhatsApp client is not ready. Please authenticate first.');
+            }
+
+            // Validate group name
+            if (!groupName || groupName.trim().length === 0) {
+                throw new Error('Group name is required');
+            }
+
+            if (groupName.length > 25) {
+                throw new Error('Group name cannot exceed 25 characters');
+            }
+
+            // Validate participants
+            if (!participantNumbers || !Array.isArray(participantNumbers) || participantNumbers.length === 0) {
+                throw new Error('At least one participant is required');
+            }
+
+            // Format participant numbers as chat IDs
+            const participantChatIds = participantNumbers.map(number => {
+                const sanitized = number.replace(/[^\d]/g, '');
+                return `${sanitized}@c.us`;
+            });
+
+            console.log(`🔧 Creating WhatsApp group: ${groupName}`);
+            console.log(`👥 Participants: ${participantChatIds.length}`);
+
+            // Create the group
+            const group = await client.createGroup(groupName.trim(), participantChatIds);
+
+            console.log(`✅ Group created successfully: ${group.gid._serialized}`);
+
+            return {
+                success: true,
+                groupId: group.gid._serialized,
+                groupName: groupName.trim(),
+                participants: participantChatIds,
+                participantCount: participantChatIds.length,
+                createdAt: new Date()
+            };
+            
+        }, 3, `createWhatsAppGroup: ${groupName}`);
+    }
+
+    /**
+     * Add participants to an existing WhatsApp group
+     * @param {string} groupId - WhatsApp group ID
+     * @param {string[]} participantNumbers - Array of phone numbers to add
+     */
+    async addParticipantsToGroup(groupId, participantNumbers) {
+        return await this.executeWithRetry(async () => {
+            if (!this.isReady) {
+                throw new Error('WhatsApp client is not ready. Please authenticate first.');
+            }
+
+            // Validate inputs
+            if (!groupId) {
+                throw new Error('Group ID is required');
+            }
+
+            if (!participantNumbers || !Array.isArray(participantNumbers) || participantNumbers.length === 0) {
+                throw new Error('At least one participant number is required');
+            }
+
+            // Format participant numbers as chat IDs
+            const participantChatIds = participantNumbers.map(number => {
+                const sanitized = number.replace(/[^\d]/g, '');
+                return `${sanitized}@c.us`;
+            });
+
+            console.log(`👥 Adding ${participantChatIds.length} participants to group ${groupId}`);
+
+            // Get the group chat
+            const chat = await client.getChatById(groupId);
+            
+            if (!chat.isGroup) {
+                throw new Error('Chat ID is not a group');
+            }
+
+            // Add participants
+            const results = await chat.addParticipants(participantChatIds);
+
+            console.log(`✅ Participants added to group`);
+
+            return {
+                success: true,
+                groupId: groupId,
+                addedParticipants: participantChatIds,
+                results: results,
+                timestamp: new Date()
+            };
+            
+        }, 3, `addParticipantsToGroup: ${groupId}`);
+    }
+
+    /**
+     * Remove participants from a WhatsApp group
+     * @param {string} groupId - WhatsApp group ID
+     * @param {string[]} participantNumbers - Array of phone numbers to remove
+     */
+    async removeParticipantsFromGroup(groupId, participantNumbers) {
+        return await this.executeWithRetry(async () => {
+            if (!this.isReady) {
+                throw new Error('WhatsApp client is not ready. Please authenticate first.');
+            }
+
+            // Validate inputs
+            if (!groupId) {
+                throw new Error('Group ID is required');
+            }
+
+            if (!participantNumbers || !Array.isArray(participantNumbers) || participantNumbers.length === 0) {
+                throw new Error('At least one participant number is required');
+            }
+
+            // Format participant numbers as chat IDs
+            const participantChatIds = participantNumbers.map(number => {
+                const sanitized = number.replace(/[^\d]/g, '');
+                return `${sanitized}@c.us`;
+            });
+
+            console.log(`👥 Removing ${participantChatIds.length} participants from group ${groupId}`);
+
+            // Get the group chat
+            const chat = await client.getChatById(groupId);
+            
+            if (!chat.isGroup) {
+                throw new Error('Chat ID is not a group');
+            }
+
+            // Remove participants
+            const results = await chat.removeParticipants(participantChatIds);
+
+            console.log(`✅ Participants removed from group`);
+
+            return {
+                success: true,
+                groupId: groupId,
+                removedParticipants: participantChatIds,
+                results: results,
+                timestamp: new Date()
+            };
+            
+        }, 3, `removeParticipantsFromGroup: ${groupId}`);
+    }
+
+    /**
+     * Send message to a WhatsApp group
+     * @param {string} groupId - WhatsApp group ID
+     * @param {string} message - Message to send
+     */
+    async sendGroupMessage(groupId, message) {
+        return await this.executeWithRetry(async () => {
+            if (!this.isReady) {
+                throw new Error('WhatsApp client is not ready. Please authenticate first.');
+            }
+
+            const response = await client.sendMessage(groupId, message);
+            
+            console.log(`📨 Message sent to group ${groupId}`);
+            
+            return {
+                success: true,
+                messageId: response.id._serialized,
+                timestamp: response.timestamp,
+                groupId: groupId,
+                body: message,
+                ack: response.ack
+            };
+            
+        }, 3, `sendGroupMessage to ${groupId}`);
+    }
+
+    /**
+     * Get group invite link
+     * @param {string} groupId - WhatsApp group ID
+     */
+    async getGroupInviteLink(groupId) {
+        return await this.executeWithRetry(async () => {
+            if (!this.isReady) {
+                throw new Error('WhatsApp client is not ready. Please authenticate first.');
+            }
+
+            const chat = await client.getChatById(groupId);
+            
+            if (!chat.isGroup) {
+                throw new Error('Chat ID is not a group');
+            }
+
+            const inviteCode = await chat.getInviteCode();
+            const inviteLink = `https://chat.whatsapp.com/${inviteCode}`;
+
+            console.log(`🔗 Generated invite link for group ${groupId}`);
+
+            return {
+                success: true,
+                groupId: groupId,
+                inviteCode: inviteCode,
+                inviteLink: inviteLink,
+                timestamp: new Date()
+            };
+            
+        }, 3, `getGroupInviteLink for ${groupId}`);
+    }
+
+    /**
      * Get connection state with enhanced health information
      */
     getState() {
