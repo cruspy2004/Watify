@@ -15,8 +15,8 @@ import {
 } from '@mui/material';
 import { 
   Visibility, 
-
-  
+  VisibilityOff, 
+  Security,
   LockOutlined,
   Settings as SettingsIcon
 } from '@mui/icons-material';
