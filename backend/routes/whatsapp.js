@@ -409,6 +409,218 @@ router.get('/groups', authenticateToken, async (req, res) => {
   }
 });
 
+// Get detailed group information including participants
+router.get('/groups/:groupId/info', authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const groupInfo = await whatsappService.getGroupInfo(groupId);
+    
+    res.json({
+      status: 'success',
+      message: 'Group information retrieved successfully',
+      data: groupInfo
+    });
+  } catch (error) {
+    console.error('Error getting group info:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get group information',
+      error: error.message
+    });
+  }
+});
+
+// Create a new WhatsApp group
+router.post('/groups/create', authenticateToken, async (req, res) => {
+  try {
+    const { groupName, participants } = req.body;
+    
+    // Validation
+    if (!groupName || !participants || !Array.isArray(participants)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Group name and participants array are required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const result = await whatsappService.createWhatsAppGroup(groupName, participants);
+    
+    res.status(201).json({
+      status: 'success',
+      message: 'WhatsApp group created successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error creating WhatsApp group:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to create WhatsApp group',
+      error: error.message
+    });
+  }
+});
+
+// Add participants to a group
+router.post('/groups/:groupId/participants/add', authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { participants } = req.body;
+    
+    if (!participants || !Array.isArray(participants)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Participants array is required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const result = await whatsappService.addParticipantsToGroup(groupId, participants);
+    
+    res.json({
+      status: 'success',
+      message: 'Participants added to group successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error adding participants to group:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to add participants to group',
+      error: error.message
+    });
+  }
+});
+
+// Remove participants from a group
+router.delete('/groups/:groupId/participants/remove', authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { participants } = req.body;
+    
+    if (!participants || !Array.isArray(participants)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Participants array is required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const result = await whatsappService.removeParticipantsFromGroup(groupId, participants);
+    
+    res.json({
+      status: 'success',
+      message: 'Participants removed from group successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error removing participants from group:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to remove participants from group',
+      error: error.message
+    });
+  }
+});
+
+// Send message to a WhatsApp group
+router.post('/groups/:groupId/send-message', authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { message } = req.body;
+    
+    if (!message) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Message is required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const result = await whatsappService.sendGroupMessage(groupId, message);
+    
+    res.json({
+      status: 'success',
+      message: 'Message sent to group successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error sending message to group:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to send message to group',
+      error: error.message
+    });
+  }
+});
+
+// Get group invite link
+router.get('/groups/:groupId/invite', authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const result = await whatsappService.getGroupInviteLink(groupId);
+    
+    res.json({
+      status: 'success',
+      message: 'Group invite link generated successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error getting group invite link:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get group invite link',
+      error: error.message
+    });
+  }
+});
+
 // Restart WhatsApp client
 router.post('/restart', authenticateToken, async (req, res) => {
   try {
