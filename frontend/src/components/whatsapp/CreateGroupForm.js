@@ -152,7 +152,10 @@ const CreateGroupForm = () => {
         },
         body: JSON.stringify({
           groupName: formData.group_name.trim(),
-          participants: [formData.initialParticipant.trim()],
+          participants: formData.initialParticipant.trim()
+            .split(',')
+            .map(p => p.trim())
+            .filter(p => p.length > 0), // Handle comma-separated numbers
           description: formData.description.trim()
         })
       });
