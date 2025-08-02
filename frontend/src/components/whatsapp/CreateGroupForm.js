@@ -367,12 +367,12 @@ const CreateGroupForm = () => {
         <TextField
           fullWidth
           name="initialParticipant"
-          label="Initial Participant Phone Number"
+          label="Participant Phone Numbers"
           value={formData.initialParticipant}
           onChange={handleInputChange}
           required
-          placeholder="e.g., +923363448803 or 923363448803"
-          helperText="At least one participant is required to create a WhatsApp group. You can add more members later."
+          placeholder="e.g., 923363448803,923126604697 or 923363448803, 923126604697"
+          helperText="Enter phone numbers separated by commas. At least one participant is required to create a WhatsApp group."
           sx={{ 
             mb: 4,
             '& .MuiOutlinedInput-root': {
