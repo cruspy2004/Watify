@@ -39,7 +39,7 @@ const Login = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { login } = useAuth();
-  const { isDarkMode, isHighContrast, theme } = useCustomTheme();
+  const { isDarkMode, theme } = useCustomTheme();
   const navigate = useNavigate();
 
   // Enhanced password strength checker
