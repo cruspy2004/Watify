@@ -582,15 +582,39 @@ class WhatsAppService {
             // Create the group
             const group = await client.createGroup(groupName.trim(), participantChatIds);
 
-            console.log(`✅ Group created successfully: ${group.gid._serialized}`);
+            console.log(`🔍 Debug - Group creation response:`, {
+                hasGroup: !!group,
+                hasGid: !!(group && group.gid),
+                hasId: !!(group && group.id),
+                keys: group ? Object.keys(group) : 'no group',
+                type: typeof group
+            });
+
+            // Handle different response formats
+            let groupId = null;
+            if (group && group.gid && group.gid._serialized) {
+                groupId = group.gid._serialized;
+            } else if (group && group.id && group.id._serialized) {
+                groupId = group.id._serialized;
+            } else if (typeof group === 'string') {
+                groupId = group;
+            } else if (group && group._serialized) {
+                groupId = group._serialized;
+            } else {
+                console.log(`⚠️ Unexpected group response format:`, group);
+                groupId = group ? group.toString() : 'unknown';
+            }
+
+            console.log(`✅ Group created successfully: ${groupId}`);
 
             return {
                 success: true,
-                groupId: group.gid._serialized,
+                groupId: groupId,
                 groupName: groupName.trim(),
                 participants: participantChatIds,
                 participantCount: participantChatIds.length,
-                createdAt: new Date()
+                createdAt: new Date(),
+                rawResponse: group // Include raw response for debugging
             };
             
         }, 3, `createWhatsAppGroup: ${groupName}`);
