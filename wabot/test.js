@@ -13,8 +13,8 @@ client.on('ready', async () => {
 
     // List of participant phone numbers in international format (with @c.us)
     const participants = [
-        '1234567890@c.us',  // replace with real numbers
-        '1987654321@c.us'
+        '923258660707@c.us',  // replace with real numbers
+        '923126604697@c.us'
     ];
 
     try {
