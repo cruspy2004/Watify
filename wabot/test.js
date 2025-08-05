@@ -28,7 +28,7 @@ client.on('ready', async () => {
         const groupChat = await client.createGroup('My Gang Chat 💥', participants);
 
         // Show the group ID
-        console.log(`✅ Group created! ID: ${groupChat.id._serialized}`);
+        console.log(`✅ Group created! `);
 
         // Send welcome message
         await client.sendMessage(groupChat.id._serialized, '🔥 Welcome to the gang!');
