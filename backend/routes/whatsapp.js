@@ -477,6 +477,92 @@ router.post('/groups/create', authenticateToken, async (req, res) => {
   }
 });
 
+// Create a new WhatsApp group with automatic contact addition
+router.post('/groups/create-with-contacts', authenticateToken, async (req, res) => {
+  try {
+    const { groupName, participants } = req.body;
+    
+    // Validation
+    if (!groupName || !participants || !Array.isArray(participants)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Group name and participants array are required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    console.log(`🔧 Creating group with contacts - Name: ${groupName}, Participants: ${participants.length}`);
+
+    const result = await whatsappService.createWhatsAppGroupWithContacts(groupName, participants);
+    
+    // Check if group creation was successful
+    if (result.groupId && !result.groupId.includes('CreateGroupError')) {
+      res.status(201).json({
+        status: 'success',
+        message: `WhatsApp group created successfully with ${result.successfulContacts}/${participants.length} contacts`,
+        data: result
+      });
+    } else {
+      res.status(400).json({
+        status: 'error',
+        message: 'Group creation failed - WhatsApp rejected the request',
+        data: result
+      });
+    }
+  } catch (error) {
+    console.error('Error creating WhatsApp group with contacts:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to create WhatsApp group with contacts',
+      error: error.message
+    });
+  }
+});
+
+// Add a single contact to WhatsApp
+router.post('/contacts/add', authenticateToken, async (req, res) => {
+  try {
+    const { phoneNumber, name } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Phone number is required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const result = await whatsappService.addContact(phoneNumber, name);
+    
+    res.json({
+      status: 'success',
+      message: 'Contact added successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error adding contact:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to add contact',
+      error: error.message
+    });
+  }
+});
+
 // Add participants to a group
 router.post('/groups/:groupId/participants/add', authenticateToken, async (req, res) => {
   try {
