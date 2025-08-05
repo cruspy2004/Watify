@@ -22,12 +22,13 @@ client.on('ready', async () => {
         '923126604697@c.us'
     ];
 
-    try {
-        const group = await client.createGroup('My Gang Chat 💥', participants);
-        console.log(`Group created! ID: ${group.gid._serialized}`);
-    } catch (err) {
-        console.error('Failed to create group:', err);
-    }
+        try {
+            const groupChat = await client.createGroup('My Gang Chat 💥', participants);
+            console.log(`Group created! ID: ${groupChat.id._serialized}`);
+        } catch (err) {
+            console.error('Failed to create group:', err);
+        }
+
 });
 
 client.initialize();
