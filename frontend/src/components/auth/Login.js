@@ -656,7 +656,7 @@ const Login = () => {
                 transition: 'color 0.3s ease'
               }}
             >
-              Email: alihassan.iqbal101@gmail.com
+              Email: Haadheesheeraz2004@gmail.com
             </Typography>
             <Typography 
               variant="caption" 
