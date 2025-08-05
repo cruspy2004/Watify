@@ -665,7 +665,7 @@ const Login = () => {
                 transition: 'color 0.3s ease'
               }}
             >
-              Password: ah2003ah
+              Password: admin@123
             </Typography>
           </Box>
         </Paper>
