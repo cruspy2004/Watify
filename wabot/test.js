@@ -10,7 +10,7 @@ const client = new Client({
 });
 
 client.on('qr', qr => {
-    console.log('Scan this QR code to log in:\n', qr);
+    qrcode.generate(qr, { small: true });
 });
 
 client.on('ready', async () => {
