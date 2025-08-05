@@ -681,6 +681,15 @@ class WhatsAppService {
             // Step 2: Create the group with processed contacts
             console.log(`👥 Creating group with ${processedParticipants.length} valid contacts...`);
 
+            // Check client health before group creation
+            const clientHealth = getClientHealth();
+            if (!clientHealth.isReady) {
+                throw new Error('WhatsApp client is not ready for group creation');
+            }
+
+            // Wait a bit before group creation to ensure stability
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             const group = await client.createGroup(groupName.trim(), processedParticipants);
 
             console.log(`🔍 Debug - Group creation response:`, {
