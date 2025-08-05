@@ -346,6 +346,9 @@ router.post('/broadcast', authenticateToken, async (req, res) => {
     });
   }
 });
+
+// Send message to a single number
+router.post('/send-message', authenticateToken, async (req, res) => {
   try {
     const { number, message } = req.body;
     
