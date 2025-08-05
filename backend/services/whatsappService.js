@@ -762,10 +762,13 @@ class WhatsAppService {
                 stringValue: typeof group === 'string' ? group : 'not string'
             });
 
-            // Check if the response is an error
-            if (typeof group === 'string' && group.includes('Error')) {
-                console.log(`❌ WhatsApp group creation failed: ${group}`);
-                throw new Error(`WhatsApp group creation failed: ${group}`);
+            // Check if the response is an error (improved error detection)
+            if (typeof group === 'string') {
+                const groupStr = group.toString().toLowerCase();
+                if (groupStr.includes('error') || groupStr.includes('creategrouperror') || groupStr.includes('unknown error')) {
+                    console.log(`❌ WhatsApp group creation failed: ${group}`);
+                    throw new Error(`WhatsApp group creation failed: ${group}`);
+                }
             }
 
             // Handle different response formats
