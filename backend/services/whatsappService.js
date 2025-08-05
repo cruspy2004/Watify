@@ -587,8 +587,15 @@ class WhatsAppService {
                 hasGid: !!(group && group.gid),
                 hasId: !!(group && group.id),
                 keys: group ? Object.keys(group) : 'no group',
-                type: typeof group
+                type: typeof group,
+                stringValue: typeof group === 'string' ? group : 'not string'
             });
+
+            // Check if the response is an error
+            if (typeof group === 'string' && group.includes('Error')) {
+                console.log(`❌ WhatsApp group creation failed: ${group}`);
+                throw new Error(`WhatsApp group creation failed: ${group}`);
+            }
 
             // Handle different response formats
             let groupId = null;
@@ -596,13 +603,13 @@ class WhatsAppService {
                 groupId = group.gid._serialized;
             } else if (group && group.id && group.id._serialized) {
                 groupId = group.id._serialized;
-            } else if (typeof group === 'string') {
-                groupId = group;
             } else if (group && group._serialized) {
                 groupId = group._serialized;
+            } else if (typeof group === 'string' && !group.includes('Error')) {
+                groupId = group;
             } else {
                 console.log(`⚠️ Unexpected group response format:`, group);
-                groupId = group ? group.toString() : 'unknown';
+                throw new Error(`Unexpected WhatsApp response: ${group ? group.toString() : 'null'}`);
             }
 
             console.log(`✅ Group created successfully: ${groupId}`);
