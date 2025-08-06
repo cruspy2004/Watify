@@ -493,14 +493,26 @@ class WhatsAppService {
             }
 
             const chats = await client.getChats();
-            return chats.map(chat => ({
-                id: chat.id._serialized,
-                name: chat.name,
-                isGroup: chat.isGroup,
-                unreadCount: chat.unreadCount,
-                timestamp: chat.timestamp,
-                lastMessage: chat.lastMessage
-            }));
+            return chats.map(chat => {
+                // Debug logging to see what we get
+                if (chat.isGroup) {
+                    console.log(`📋 Group found: ${chat.name} - ID structure:`, {
+                        hasId: !!chat.id,
+                        idSerialized: chat.id ? chat.id._serialized : 'no id',
+                        fullId: chat.id
+                    });
+                }
+                
+                return {
+                    id: chat.id ? chat.id._serialized : null,
+                    name: chat.name,
+                    isGroup: chat.isGroup,
+                    unreadCount: chat.unreadCount,
+                    timestamp: chat.timestamp,
+                    lastMessage: chat.lastMessage,
+                    participants: chat.participants || [] // Add participants if available
+                };
+            });
             
         }, 3, 'getChats');
     }
