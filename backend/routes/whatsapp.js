@@ -129,36 +129,40 @@ router.get('/groups', authenticateToken, async (req, res) => {
       });
     }
 
-    console.log('📋 Fetching WhatsApp groups...');
-    const chats = await whatsappService.getChats();
-    console.log(`📊 Total chats found: ${chats.length}`);
+    console.log('📋 Fetching WhatsApp groups directly from client...');
     
-    const groups = chats.filter(chat => chat.isGroup);
-    console.log(`📊 Groups found: ${groups.length}`);
+    // Get chats directly from whatsapp service without transformation issues
+    const allChats = await whatsappService.executeWithRetry(async () => {
+      const { client } = require('../config/whatsapp');
+      const chats = await client.getChats();
+      
+      console.log(`📊 Raw chats found: ${chats.length}`);
+      
+      return chats.filter(chat => chat.isGroup).map(chat => {
+        const groupId = chat.id && chat.id._serialized ? chat.id._serialized : null;
+        console.log(`📋 Group: ${chat.name} - ID: ${groupId}`);
+        
+        return {
+          id: groupId,
+          name: chat.name || 'Unnamed Group',
+          description: chat.description || '',
+          participantCount: chat.participants ? chat.participants.length : 0,
+          isGroup: true,
+          timestamp: chat.timestamp ? new Date(chat.timestamp * 1000) : null,
+          lastMessage: chat.lastMessage ? {
+            body: chat.lastMessage.body || '',
+            timestamp: chat.lastMessage.timestamp ? new Date(chat.lastMessage.timestamp * 1000) : null
+          } : null
+        };
+      }).filter(group => group.id !== null); // Only return groups with valid IDs
+    }, 3, 'getGroups');
 
-    // Create simplified group data
-    const groupData = groups.map(group => {
-      console.log(`📋 Processing group: ${group.name}, ID: ${group.id}`);
-      return {
-        id: group.id,
-        name: group.name || 'Unnamed Group',
-        description: '',
-        participantCount: group.participants ? group.participants.length : 0,
-        isGroup: true,
-        timestamp: group.timestamp ? new Date(group.timestamp * 1000) : null,
-        lastMessage: group.lastMessage ? {
-          body: group.lastMessage.body || '',
-          timestamp: group.lastMessage.timestamp ? new Date(group.lastMessage.timestamp * 1000) : null
-        } : null
-      };
-    }).filter(group => group.id); // Filter out groups without IDs
-
-    console.log(`📊 Valid groups with IDs: ${groupData.length}`);
+    console.log(`📊 Valid groups found: ${allChats.length}`);
 
     res.json({
       status: 'success',
       message: 'WhatsApp groups retrieved successfully',
-      data: groupData
+      data: allChats
     });
   } catch (error) {
     console.error('Error getting WhatsApp groups:', error);
