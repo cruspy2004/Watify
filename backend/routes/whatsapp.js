@@ -129,42 +129,31 @@ router.get('/groups', authenticateToken, async (req, res) => {
       });
     }
 
+    console.log('📋 Fetching WhatsApp groups...');
     const chats = await whatsappService.getChats();
+    console.log(`📊 Total chats found: ${chats.length}`);
+    
     const groups = chats.filter(chat => chat.isGroup);
+    console.log(`📊 Groups found: ${groups.length}`);
 
-    // Get detailed group information with participant counts
-    const groupDataPromises = groups.map(async (group) => {
-      try {
-        // Get detailed group info to get participant count
-        const groupInfo = await whatsappService.getGroupInfo(group.id);
-        return {
-          id: group.id,
-          name: group.name || 'Unnamed Group',
-          description: groupInfo.description || '',
-          participantCount: groupInfo.participantCount || 0,
-          isGroup: true,
-          timestamp: group.timestamp ? new Date(group.timestamp * 1000) : null,
-          lastMessage: group.lastMessage ? {
-            body: group.lastMessage.body,
-            timestamp: new Date(group.lastMessage.timestamp * 1000)
-          } : null
-        };
-      } catch (error) {
-        // If detailed info fails, return basic info
-        console.warn(`Could not get detailed info for group ${group.id}:`, error.message);
-        return {
-          id: group.id,
-          name: group.name || 'Unnamed Group',
-          description: '',
-          participantCount: 0,
-          isGroup: true,
-          timestamp: group.timestamp ? new Date(group.timestamp * 1000) : null,
-          lastMessage: null
-        };
-      }
-    });
+    // Create simplified group data
+    const groupData = groups.map(group => {
+      console.log(`📋 Processing group: ${group.name}, ID: ${group.id}`);
+      return {
+        id: group.id,
+        name: group.name || 'Unnamed Group',
+        description: '',
+        participantCount: group.participants ? group.participants.length : 0,
+        isGroup: true,
+        timestamp: group.timestamp ? new Date(group.timestamp * 1000) : null,
+        lastMessage: group.lastMessage ? {
+          body: group.lastMessage.body || '',
+          timestamp: group.lastMessage.timestamp ? new Date(group.lastMessage.timestamp * 1000) : null
+        } : null
+      };
+    }).filter(group => group.id); // Filter out groups without IDs
 
-    const groupData = await Promise.all(groupDataPromises);
+    console.log(`📊 Valid groups with IDs: ${groupData.length}`);
 
     res.json({
       status: 'success',
