@@ -132,14 +132,39 @@ router.get('/groups', authenticateToken, async (req, res) => {
     const chats = await whatsappService.getChats();
     const groups = chats.filter(chat => chat.isGroup);
 
-    const groupData = groups.map(group => ({
-      id: group.id._serialized,
-      name: group.name,
-      description: group.description || '',
-      participantCount: group.participants ? group.participants.length : 0,
-      isGroup: true,
-      timestamp: group.timestamp ? new Date(group.timestamp * 1000) : null
-    }));
+    // Get detailed group information with participant counts
+    const groupDataPromises = groups.map(async (group) => {
+      try {
+        // Get detailed group info to get participant count
+        const groupInfo = await whatsappService.getGroupInfo(group.id);
+        return {
+          id: group.id,
+          name: group.name || 'Unnamed Group',
+          description: groupInfo.description || '',
+          participantCount: groupInfo.participantCount || 0,
+          isGroup: true,
+          timestamp: group.timestamp ? new Date(group.timestamp * 1000) : null,
+          lastMessage: group.lastMessage ? {
+            body: group.lastMessage.body,
+            timestamp: new Date(group.lastMessage.timestamp * 1000)
+          } : null
+        };
+      } catch (error) {
+        // If detailed info fails, return basic info
+        console.warn(`Could not get detailed info for group ${group.id}:`, error.message);
+        return {
+          id: group.id,
+          name: group.name || 'Unnamed Group',
+          description: '',
+          participantCount: 0,
+          isGroup: true,
+          timestamp: group.timestamp ? new Date(group.timestamp * 1000) : null,
+          lastMessage: null
+        };
+      }
+    });
+
+    const groupData = await Promise.all(groupDataPromises);
 
     res.json({
       status: 'success',
