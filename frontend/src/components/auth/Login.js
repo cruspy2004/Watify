@@ -16,7 +16,6 @@ import {
 import { 
   Visibility, 
   VisibilityOff, 
-  Security,
   LockOutlined,
   Settings as SettingsIcon
 } from '@mui/icons-material';
@@ -39,7 +38,7 @@ const Login = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { login } = useAuth();
-  const { isDarkMode, isHighContrast, theme } = useCustomTheme();
+  const { isDarkMode, theme } = useCustomTheme();
   const navigate = useNavigate();
 
   // Enhanced password strength checker
@@ -657,7 +656,7 @@ const Login = () => {
                 transition: 'color 0.3s ease'
               }}
             >
-              Email: alihassan.iqbal101@gmail.com
+              Email: Haadheesheeraz2004@gmail.com
             </Typography>
             <Typography 
               variant="caption" 
@@ -666,7 +665,7 @@ const Login = () => {
                 transition: 'color 0.3s ease'
               }}
             >
-              Password: ah2003ah
+              Password: admin@123
             </Typography>
           </Box>
         </Paper>

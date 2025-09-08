@@ -19,7 +19,7 @@ if (!process.env.DB_USER) {
   process.env.DB_USER = 'postgres';
 }
 if (!process.env.DB_PASSWORD) {
-  process.env.DB_PASSWORD = 'alihassan';
+  process.env.DB_PASSWORD = 'haadheesheeraz2004';
 }
 if (!process.env.DB_NAME) {
   process.env.DB_NAME = 'postgres';

@@ -493,14 +493,26 @@ class WhatsAppService {
             }
 
             const chats = await client.getChats();
-            return chats.map(chat => ({
-                id: chat.id._serialized,
-                name: chat.name,
-                isGroup: chat.isGroup,
-                unreadCount: chat.unreadCount,
-                timestamp: chat.timestamp,
-                lastMessage: chat.lastMessage
-            }));
+            return chats.map(chat => {
+                // Debug logging to see what we get
+                if (chat.isGroup) {
+                    console.log(`📋 Group found: ${chat.name} - ID structure:`, {
+                        hasId: !!chat.id,
+                        idSerialized: chat.id ? chat.id._serialized : 'no id',
+                        fullId: chat.id
+                    });
+                }
+                
+                return {
+                    id: chat.id ? chat.id._serialized : null,
+                    name: chat.name,
+                    isGroup: chat.isGroup,
+                    unreadCount: chat.unreadCount,
+                    timestamp: chat.timestamp,
+                    lastMessage: chat.lastMessage,
+                    participants: chat.participants || [] // Add participants if available
+                };
+            });
             
         }, 3, 'getChats');
     }
@@ -546,6 +558,204 @@ class WhatsAppService {
     }
 
     /**
+     * Add a contact to WhatsApp contacts
+     * @param {string} phoneNumber - Phone number to add as contact
+     * @param {string} name - Contact name
+     */
+    async addContact(phoneNumber, name = null) {
+        return await this.executeWithRetry(async () => {
+            if (!this.isReady) {
+                throw new Error('WhatsApp client is not ready. Please authenticate first.');
+            }
+
+            const sanitizedNumber = phoneNumber.replace(/[^\d]/g, '');
+            const contactId = `${sanitizedNumber}@c.us`;
+            
+            console.log(`📇 Adding contact: ${name || sanitizedNumber}`);
+
+            // Check if contact is already registered on WhatsApp
+            const isRegistered = await client.isRegisteredUser(contactId);
+            if (!isRegistered) {
+                throw new Error(`Number ${phoneNumber} is not registered on WhatsApp`);
+            }
+
+            // Get or create contact
+            const contact = await client.getContactById(contactId);
+            
+            // If name is provided, try to update the contact name
+            if (name && name.trim()) {
+                try {
+                    // Note: WhatsApp Web doesn't directly allow setting contact names
+                    // The contact name is usually synced from phone's contact list
+                    console.log(`📇 Contact found: ${contact.pushname || contact.number}`);
+                } catch (error) {
+                    console.log(`⚠️ Could not set contact name: ${error.message}`);
+                }
+            }
+
+            return {
+                success: true,
+                contactId: contactId,
+                phoneNumber: sanitizedNumber,
+                name: contact.pushname || name || sanitizedNumber,
+                isRegistered: true,
+                timestamp: new Date()
+            };
+            
+        }, 3, `addContact: ${phoneNumber}`);
+    }
+
+    /**
+     * Create WhatsApp group with automatic contact addition
+     * @param {string} groupName - Name of the group
+     * @param {Array} participants - Array of participant objects or phone numbers
+     */
+    async createWhatsAppGroupWithContacts(groupName, participants) {
+        return await this.executeWithRetry(async () => {
+            if (!this.isReady) {
+                throw new Error('WhatsApp client is not ready. Please authenticate first.');
+            }
+
+            // Validate group name
+            if (!groupName || groupName.trim().length === 0) {
+                throw new Error('Group name is required');
+            }
+
+            if (groupName.length > 25) {
+                throw new Error('Group name cannot exceed 25 characters');
+            }
+
+            // Validate participants
+            if (!participants || !Array.isArray(participants) || participants.length === 0) {
+                throw new Error('At least one participant is required');
+            }
+
+            console.log(`🔧 Creating WhatsApp group with contacts: ${groupName}`);
+            console.log(`👥 Processing ${participants.length} participants...`);
+
+            // Step 1: Process and add contacts
+            const processedParticipants = [];
+            const contactResults = [];
+
+            for (let i = 0; i < participants.length; i++) {
+                const participant = participants[i];
+                let phoneNumber, name;
+
+                // Handle different input formats
+                if (typeof participant === 'string') {
+                    phoneNumber = participant;
+                    name = `Contact ${i + 1}`;
+                } else if (typeof participant === 'object') {
+                    phoneNumber = participant.phone || participant.number;
+                    name = participant.name || `Contact ${i + 1}`;
+                } else {
+                    console.log(`⚠️ Skipping invalid participant: ${participant}`);
+                    continue;
+                }
+
+                if (!phoneNumber) {
+                    console.log(`⚠️ Skipping participant without phone number`);
+                    continue;
+                }
+
+                try {
+                    console.log(`📇 Processing contact ${i + 1}/${participants.length}: ${phoneNumber}`);
+                    
+                    // Add contact first
+                    const contactResult = await this.addContact(phoneNumber, name);
+                    processedParticipants.push(contactResult.contactId);
+                    contactResults.push({
+                        phoneNumber: phoneNumber,
+                        contactId: contactResult.contactId,
+                        name: contactResult.name,
+                        success: true
+                    });
+
+                    console.log(`✅ Contact added: ${contactResult.name} (${phoneNumber})`);
+                    
+                    // Small delay to avoid rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                } catch (error) {
+                    console.log(`❌ Failed to add contact ${phoneNumber}: ${error.message}`);
+                    contactResults.push({
+                        phoneNumber: phoneNumber,
+                        success: false,
+                        error: error.message
+                    });
+                }
+            }
+
+            if (processedParticipants.length === 0) {
+                throw new Error('No valid participants could be processed');
+            }
+
+            // Step 2: Create the group with processed contacts
+            console.log(`👥 Creating group with ${processedParticipants.length} valid contacts...`);
+
+            // Check client health before group creation
+            const clientHealth = getClientHealth();
+            if (!clientHealth.isReady) {
+                throw new Error('WhatsApp client is not ready for group creation');
+            }
+
+            // Wait a bit before group creation to ensure stability
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const group = await client.createGroup(groupName.trim(), processedParticipants);
+
+            console.log(`🔍 Debug - Group creation response:`, {
+                hasGroup: !!group,
+                hasGid: !!(group && group.gid),
+                hasId: !!(group && group.id),
+                keys: group ? Object.keys(group) : 'no group',
+                type: typeof group,
+                stringValue: typeof group === 'string' ? group : 'not string'
+            });
+
+            // Check if the response is an error (improved error detection)
+            if (typeof group === 'string') {
+                const groupStr = group.toString().toLowerCase();
+                if (groupStr.includes('error') || groupStr.includes('creategrouperror') || groupStr.includes('unknown error')) {
+                    console.log(`❌ WhatsApp group creation failed: ${group}`);
+                    throw new Error(`WhatsApp group creation failed: ${group}`);
+                }
+            }
+
+            // Handle response format variations
+            let groupId = null;
+            if (group && group.gid && group.gid._serialized) {
+                groupId = group.gid._serialized;
+            } else if (group && group.id && group.id._serialized) {
+                groupId = group.id._serialized;
+            } else if (typeof group === 'string') {
+                groupId = group;
+            } else if (group && group._serialized) {
+                groupId = group._serialized;
+            } else {
+                console.log(`⚠️ Unexpected group response format:`, group);
+                groupId = group ? group.toString() : 'unknown';
+            }
+
+            console.log(`✅ Group created successfully: ${groupId}`);
+
+            return {
+                success: true,
+                groupId: groupId,
+                groupName: groupName.trim(),
+                participants: processedParticipants,
+                participantCount: processedParticipants.length,
+                contactResults: contactResults,
+                successfulContacts: contactResults.filter(c => c.success).length,
+                failedContacts: contactResults.filter(c => !c.success).length,
+                createdAt: new Date(),
+                rawResponse: group
+            };
+            
+        }, 3, `createWhatsAppGroupWithContacts: ${groupName}`);
+    }
+
+    /**
      * Create a new WhatsApp group
      * @param {string} groupName - Name of the group
      * @param {string[]} participantNumbers - Array of phone numbers to add
@@ -579,18 +789,61 @@ class WhatsAppService {
             console.log(`🔧 Creating WhatsApp group: ${groupName}`);
             console.log(`👥 Participants: ${participantChatIds.length}`);
 
+            // Check client health before group creation
+            const clientHealth = getClientHealth();
+            if (!clientHealth.isReady) {
+                throw new Error('WhatsApp client is not ready for group creation');
+            }
+
+            // Wait a bit before group creation to ensure stability
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             // Create the group
             const group = await client.createGroup(groupName.trim(), participantChatIds);
 
-            console.log(`✅ Group created successfully: ${group.gid._serialized}`);
+            console.log(`🔍 Debug - Group creation response:`, {
+                hasGroup: !!group,
+                hasGid: !!(group && group.gid),
+                hasId: !!(group && group.id),
+                keys: group ? Object.keys(group) : 'no group',
+                type: typeof group,
+                stringValue: typeof group === 'string' ? group : 'not string'
+            });
+
+            // Check if the response is an error (improved error detection)
+            if (typeof group === 'string') {
+                const groupStr = group.toString().toLowerCase();
+                if (groupStr.includes('error') || groupStr.includes('creategrouperror') || groupStr.includes('unknown error')) {
+                    console.log(`❌ WhatsApp group creation failed: ${group}`);
+                    throw new Error(`WhatsApp group creation failed: ${group}`);
+                }
+            }
+
+            // Handle different response formats
+            let groupId = null;
+            if (group && group.gid && group.gid._serialized) {
+                groupId = group.gid._serialized;
+            } else if (group && group.id && group.id._serialized) {
+                groupId = group.id._serialized;
+            } else if (group && group._serialized) {
+                groupId = group._serialized;
+            } else if (typeof group === 'string' && !group.includes('Error')) {
+                groupId = group;
+            } else {
+                console.log(`⚠️ Unexpected group response format:`, group);
+                throw new Error(`Unexpected WhatsApp response: ${group ? group.toString() : 'null'}`);
+            }
+
+            console.log(`✅ Group created successfully: ${groupId}`);
 
             return {
                 success: true,
-                groupId: group.gid._serialized,
+                groupId: groupId,
                 groupName: groupName.trim(),
                 participants: participantChatIds,
                 participantCount: participantChatIds.length,
-                createdAt: new Date()
+                createdAt: new Date(),
+                rawResponse: group // Include raw response for debugging
             };
             
         }, 3, `createWhatsAppGroup: ${groupName}`);

@@ -116,6 +116,255 @@ router.get('/qr', authenticateToken, async (req, res) => {
   }
 });
 
+// Get all WhatsApp groups (existing groups only)
+router.get('/groups', authenticateToken, async (req, res) => {
+  try {
+    // Check if WhatsApp is ready
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.',
+        data: { state: state.state, hasQR: state.hasQR }
+      });
+    }
+
+    console.log('📋 Fetching WhatsApp groups directly from client...');
+    
+    // Get chats directly from whatsapp service without transformation issues
+    const allChats = await whatsappService.executeWithRetry(async () => {
+      const { client } = require('../config/whatsapp');
+      const chats = await client.getChats();
+      
+      console.log(`📊 Raw chats found: ${chats.length}`);
+      
+      return chats.filter(chat => chat.isGroup).map(chat => {
+        const groupId = chat.id && chat.id._serialized ? chat.id._serialized : null;
+        console.log(`📋 Group: ${chat.name} - ID: ${groupId}`);
+        
+        return {
+          id: groupId,
+          name: chat.name || 'Unnamed Group',
+          description: chat.description || '',
+          participantCount: chat.participants ? chat.participants.length : 0,
+          isGroup: true,
+          timestamp: chat.timestamp ? new Date(chat.timestamp * 1000) : null,
+          lastMessage: chat.lastMessage ? {
+            body: chat.lastMessage.body || '',
+            timestamp: chat.lastMessage.timestamp ? new Date(chat.lastMessage.timestamp * 1000) : null
+          } : null
+        };
+      }).filter(group => group.id !== null); // Only return groups with valid IDs
+    }, 3, 'getGroups');
+
+    console.log(`📊 Valid groups found: ${allChats.length}`);
+
+    res.json({
+      status: 'success',
+      message: 'WhatsApp groups retrieved successfully',
+      data: allChats
+    });
+  } catch (error) {
+    console.error('Error getting WhatsApp groups:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get WhatsApp groups',
+      error: error.message
+    });
+  }
+});
+
+// Get detailed group information
+router.get('/groups/:groupId/info', authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const groupInfo = await whatsappService.getGroupInfo(groupId);
+    res.json({
+      status: 'success',
+      message: 'Group information retrieved successfully',
+      data: groupInfo
+    });
+  } catch (error) {
+    console.error('Error getting group info:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get group information',
+      error: error.message
+    });
+  }
+});
+
+// Send message to existing group
+router.post('/groups/:groupId/send-message', authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { message } = req.body;
+    
+    if (!message) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Message is required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const result = await whatsappService.sendGroupMessage(groupId, message);
+    res.json({
+      status: 'success',
+      message: 'Message sent to group successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error sending group message:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to send group message',
+      error: error.message
+    });
+  }
+});
+
+// Get group invitation link
+router.get('/groups/:groupId/invite-link', authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const inviteLink = await whatsappService.getGroupInviteLink(groupId);
+    res.json({
+      status: 'success',
+      message: 'Group invitation link retrieved successfully',
+      data: { inviteLink }
+    });
+  } catch (error) {
+    console.error('Error getting group invite link:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get group invitation link',
+      error: error.message
+    });
+  }
+});
+
+// Add participants to existing group
+router.post('/groups/:groupId/add-participants', authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { participants } = req.body;
+    
+    if (!participants || !Array.isArray(participants) || participants.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Participants array is required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const result = await whatsappService.addParticipantsToGroup(groupId, participants);
+    res.json({
+      status: 'success',
+      message: 'Participants added to group successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error adding participants to group:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to add participants to group',
+      error: error.message
+    });
+  }
+});
+
+// Broadcast message to multiple contacts
+router.post('/broadcast', authenticateToken, async (req, res) => {
+  try {
+    const { contacts, message, options = {} } = req.body;
+    
+    if (!contacts || !Array.isArray(contacts) || contacts.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Contacts array is required'
+      });
+    }
+    
+    if (!message) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Message is required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    // Extract phone numbers from contacts
+    const phoneNumbers = contacts.map(contact => {
+      if (typeof contact === 'string') return contact;
+      return contact.phone || contact.number;
+    }).filter(Boolean);
+
+    const result = await whatsappService.sendBulkMessages(phoneNumbers, message, {
+      delay: options.delay || 2000,
+      retries: options.retries || 3,
+      ...options
+    });
+
+    res.json({
+      status: 'success',
+      message: 'Broadcast message sent successfully',
+      data: {
+        totalContacts: phoneNumbers.length,
+        results: result,
+        broadcastId: `broadcast_${Date.now()}`,
+        timestamp: new Date()
+      }
+    });
+  } catch (error) {
+    console.error('Error sending broadcast message:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to send broadcast message',
+      error: error.message
+    });
+  }
+});
+
 // Send message to a single number
 router.post('/send-message', authenticateToken, async (req, res) => {
   try {
@@ -472,6 +721,92 @@ router.post('/groups/create', authenticateToken, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to create WhatsApp group',
+      error: error.message
+    });
+  }
+});
+
+// Create a new WhatsApp group with automatic contact addition
+router.post('/groups/create-with-contacts', authenticateToken, async (req, res) => {
+  try {
+    const { groupName, participants } = req.body;
+    
+    // Validation
+    if (!groupName || !participants || !Array.isArray(participants)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Group name and participants array are required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    console.log(`🔧 Creating group with contacts - Name: ${groupName}, Participants: ${participants.length}`);
+
+    const result = await whatsappService.createWhatsAppGroupWithContacts(groupName, participants);
+    
+    // Check if group creation was successful
+    if (result.groupId && !result.groupId.includes('CreateGroupError')) {
+      res.status(201).json({
+        status: 'success',
+        message: `WhatsApp group created successfully with ${result.successfulContacts}/${participants.length} contacts`,
+        data: result
+      });
+    } else {
+      res.status(400).json({
+        status: 'error',
+        message: 'Group creation failed - WhatsApp rejected the request',
+        data: result
+      });
+    }
+  } catch (error) {
+    console.error('Error creating WhatsApp group with contacts:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to create WhatsApp group with contacts',
+      error: error.message
+    });
+  }
+});
+
+// Add a single contact to WhatsApp
+router.post('/contacts/add', authenticateToken, async (req, res) => {
+  try {
+    const { phoneNumber, name } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Phone number is required'
+      });
+    }
+
+    const state = whatsappService.getState();
+    if (!state.isReady) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'WhatsApp client is not ready. Please authenticate first.'
+      });
+    }
+
+    const result = await whatsappService.addContact(phoneNumber, name);
+    
+    res.json({
+      status: 'success',
+      message: 'Contact added successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error adding contact:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to add contact',
       error: error.message
     });
   }
