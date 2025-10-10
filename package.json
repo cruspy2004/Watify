@@ -1,4 +1,5 @@
 {
+
   "name": "wateen_watify",
   "version": "1.0.0",
   "description": "Full-stack application with React frontend, Node.js/Express backend, and PostgreSQL database",
