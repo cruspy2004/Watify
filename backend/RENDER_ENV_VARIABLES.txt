@@ -1,16 +1,20 @@
 # Render Environment Variables
 # Copy these to your Render dashboard under "Environment"
+# IMPORTANT: Use IPv4 hostname for Supabase connection
 
 NODE_ENV=production
 PORT=10000
 
-# Supabase Database
+# Supabase Database (Use IPv4 hostname)
+# Get this from: Supabase Dashboard → Settings → Database → Connection String (Direct connection)
 DB_HOST=db.yjarmeecsensscrtiebh.supabase.co
 DB_PORT=5432
 DB_NAME=postgres
-DB_USER=postgres
+DB_USER=postgres.yjarmeecsensscrtiebh
 DB_PASSWORD=haadheesheeraz-2004
-DATABASE_URL=postgresql://postgres:haadheesheeraz-2004@db.yjarmeecsensscrtiebh.supabase.co:5432/postgres
+
+# Alternative: Use full connection string
+DATABASE_URL=postgresql://postgres.yjarmeecsensscrtiebh:haadheesheeraz-2004@db.yjarmeecsensscrtiebh.supabase.co:5432/postgres
 
 # JWT Secret (IMPORTANT: Change this in production!)
 JWT_SECRET=watify_super_secret_jwt_key_2024_change_in_production_very_secure_token

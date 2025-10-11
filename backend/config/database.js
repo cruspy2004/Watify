@@ -10,7 +10,9 @@ const dbConfig = {
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20, // Maximum number of clients in pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // Return error after 2 seconds if connection could not be established
+  connectionTimeoutMillis: 10000, // Increased timeout to 10 seconds
+  // Force IPv4 to avoid IPv6 connection issues on some platforms
+  family: 4,
 };
 
 // Only add password if it exists and is not empty
