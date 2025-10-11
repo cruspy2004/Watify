@@ -1,5 +1,9 @@
 const { Pool } = require('pg');
+const dns = require('dns');
 require('dotenv').config();
+
+// Force IPv4 resolution to prevent IPv6 connection issues
+dns.setDefaultResultOrder('ipv4first');
 
 // Database configuration
 const dbConfig = {
@@ -11,8 +15,6 @@ const dbConfig = {
   max: 20, // Maximum number of clients in pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
   connectionTimeoutMillis: 10000, // Increased timeout to 10 seconds
-  // Force IPv4 to avoid IPv6 connection issues on some platforms
-  family: 4,
 };
 
 // Only add password if it exists and is not empty
