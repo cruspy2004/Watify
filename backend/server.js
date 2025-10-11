@@ -78,19 +78,26 @@ app.use('*', (req, res) => {
 // Initialize database and start server
 async function startServer() {
   try {
-    // Test database connection and create tables if needed
-    console.log('🔄 Initializing database...');
-    await testConnection();
-    await createTables();
-    console.log('✅ Database initialized successfully!');
-    
-    // Start the server first
+    // Start the server FIRST (so Render knows the app is running)
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on port ${PORT}`);
       console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🌐 Access the API at: http://localhost:${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
     });
+    
+    // Then test database connection (non-blocking)
+    setTimeout(async () => {
+      try {
+        console.log('🔄 Initializing database...');
+        await testConnection();
+        await createTables();
+        console.log('✅ Database initialized successfully!');
+      } catch (dbError) {
+        console.error('⚠️ Database initialization failed (server will continue):', dbError.message);
+        console.log('💡 Database endpoints will not work until connection is fixed');
+      }
+    }, 1000);
     
     // Initialize WhatsApp client after server is running
     console.log('🔄 Initializing WhatsApp client...');
@@ -103,11 +110,10 @@ async function startServer() {
         console.error('⚠️ WhatsApp initialization failed (server will continue):', whatsappError.message);
         console.log('💡 WhatsApp can be initialized later via API endpoints');
       }
-    }, 2000);
+    }, 3000);
     
   } catch (error) {
     console.error('❌ Failed to start server:', error);
-    console.error('💡 Make sure PostgreSQL is running and database credentials are correct');
     process.exit(1);
   }
 }
