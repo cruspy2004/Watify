@@ -1,5 +1,6 @@
 -- SQL Script to Add Your User to Supabase
 -- Copy and paste this into Supabase SQL Editor
+-- Supabase URL: https://yjarmeecsensscrtiebh.supabase.co
 
 -- Step 1: Create users table if it doesn't exist
 CREATE TABLE IF NOT EXISTS users (
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Step 2: Insert your user with hashed password
+-- Email: haadheesheeraz2004@gmail.com
 -- Password: admin@123 (already hashed with bcrypt)
 INSERT INTO users (name, email, password, role, active) 
 VALUES (
