@@ -1,0 +1,20 @@
+# Render Environment Variables
+# Copy these to your Render dashboard under "Environment"
+
+NODE_ENV=production
+PORT=10000
+
+# Supabase Database
+DB_HOST=db.yjarmeecsensscrtiebh.supabase.co
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=haadheesheeraz-2004
+DATABASE_URL=postgresql://postgres:haadheesheeraz-2004@db.yjarmeecsensscrtiebh.supabase.co:5432/postgres
+
+# JWT Secret (IMPORTANT: Change this in production!)
+JWT_SECRET=watify_super_secret_jwt_key_2024_change_in_production_very_secure_token
+JWT_EXPIRE=7d
+
+# Frontend URL (Update after deploying frontend)
+CLIENT_URL=https://watify.vercel.app
