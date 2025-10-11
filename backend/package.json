@@ -11,15 +11,12 @@
     "migrate": "node scripts/migrate.js run",
     "user:add": "node scripts/addHaadheeUser.js"
   },
-  "keywords": [
-    "react",
-    "nodejs",
-    "express",
-    "postgresql",
-    "full-stack"
-  ],
-  "author": "",
+  "keywords": ["whatsapp", "automation", "api", "messaging"],
+  "author": "Haadhee Sheeraz",
   "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "axios": "^1.10.0",
     "bcryptjs": "^2.4.3",
