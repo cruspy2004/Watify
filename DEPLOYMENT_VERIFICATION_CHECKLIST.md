@@ -39,17 +39,7 @@ Go to Render Dashboard → Your Service → Environment
 
 **Required Variables:**
 ```
-NODE_ENV=production
-PORT=10000
-DB_HOST=db.YOUR_PROJECT_REF.supabase.co
-DB_PORT=5432
-DB_NAME=postgres
-DB_USER=postgres.YOUR_PROJECT_REF
-DB_PASSWORD=YOUR_DB_PASSWORD
-JWT_SECRET=watify_super_secret_jwt_key_2024_change_in_production_very_secure_token
-JWT_EXPIRE=7d
-CLIENT_URL=https://watify.vercel.app
-```
+``
 
 **Critical Checks:**
 - [ ] DB_USER includes `.YOUR_PROJECT_REF` (the project reference)
