@@ -1,28 +1,24 @@
-# Render Environment Variables - COPY THESE EXACTLY
-# Go to Render Dashboard → Your Service → Environment → Edit
+# Render Environment Variables
+# Copy these to your Render dashboard under "Environment"
+# IMPORTANT: Use IPv4 hostname for Supabase connection
 
 NODE_ENV=production
 PORT=10000
 
-# Supabase Database Connection
+# Supabase Database (Use IPv4 hostname)
+# Get this from: Supabase Dashboard → Settings → Database → Connection String (Direct connection)
 DB_HOST=db.yjarmeecsensscrtiebh.supabase.co
 DB_PORT=5432
 DB_NAME=postgres
 DB_USER=postgres.yjarmeecsensscrtiebh
 DB_PASSWORD=haadheesheeraz-2004
 
-# Full database connection string (alternative)
+# Alternative: Use full connection string
 DATABASE_URL=postgresql://postgres.yjarmeecsensscrtiebh:haadheesheeraz-2004@db.yjarmeecsensscrtiebh.supabase.co:5432/postgres
 
-# JWT Configuration
+# JWT Secret (IMPORTANT: Change this in production!)
 JWT_SECRET=watify_super_secret_jwt_key_2024_change_in_production_very_secure_token
 JWT_EXPIRE=7d
 
-# Frontend URL (your Vercel deployment)
+# Frontend URL (Update after deploying frontend)
 CLIENT_URL=https://watify.vercel.app
-
-# IMPORTANT CHANGES FROM YOUR CURRENT SETTINGS:
-# 1. Change NODE_ENV from "development" to "production"
-# 2. Change PORT from "5001" to "10000"
-# 3. Remove: BACKEND_PORT, FRONTEND_PORT, API_BASE_URL (not needed)
-# 4. Keep all DB_ variables as shown above

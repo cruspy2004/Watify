@@ -1,29 +1,41 @@
 const { Pool } = require('pg');
-const dns = require('dns');
 require('dotenv').config();
 
-// Force IPv4 resolution to prevent IPv6 connection issues
-dns.setDefaultResultOrder('ipv4first');
-
 // Database configuration
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'wateen_watify',
-  user: process.env.DB_USER || 'postgres',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 20, // Maximum number of clients in pool
-  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 10000, // Increased timeout to 10 seconds
-};
+// Use connection string in production to avoid IPv6 issues
+const useConnectionString = process.env.NODE_ENV === 'production' && process.env.DATABASE_URL;
 
-// Only add password if it exists and is not empty
-if (process.env.DB_PASSWORD && process.env.DB_PASSWORD.trim() !== '') {
-  dbConfig.password = process.env.DB_PASSWORD;
+let pool;
+
+if (useConnectionString) {
+  console.log('🔗 Using DATABASE_URL connection string for production');
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  });
+} else {
+  console.log('🔗 Using individual database configuration parameters');
+  const dbConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'wateen_watify',
+    user: process.env.DB_USER || 'postgres',
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  };
+
+  // Only add password if it exists and is not empty
+  if (process.env.DB_PASSWORD && process.env.DB_PASSWORD.trim() !== '') {
+    dbConfig.password = process.env.DB_PASSWORD;
+  }
+  
+  pool = new Pool(dbConfig);
 }
-
-// Create a new pool
-const pool = new Pool(dbConfig);
 
 // Test the connection
 pool.on('connect', () => {
