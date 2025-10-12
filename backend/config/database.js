@@ -37,9 +37,6 @@ if (useConnectionString) {
   pool = new Pool(dbConfig);
 }
 
-// Create a new pool
-const pool = new Pool(dbConfig);
-
 // Test the connection
 pool.on('connect', () => {
   console.log('✅ Connected to PostgreSQL database');
