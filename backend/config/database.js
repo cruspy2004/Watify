@@ -1,20 +1,31 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Database configuration
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'wateen_watify',
-  user: process.env.DB_USER || 'postgres',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 20, // Maximum number of clients in pool
-  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // Return error after 2 seconds if connection could not be established
-};
+const isProduction = process.env.NODE_ENV === 'production';
+const databaseUrl = process.env.DATABASE_URL;
 
-// Only add password if it exists and is not empty
-if (process.env.DB_PASSWORD && process.env.DB_PASSWORD.trim() !== '') {
+// Prefer DATABASE_URL for hosted deployments, with a fallback to field-based config locally.
+const dbConfig = databaseUrl
+  ? {
+      connectionString: databaseUrl,
+      ssl: isProduction ? { rejectUnauthorized: false } : false,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    }
+  : {
+      host: process.env.DB_HOST || 'localhost',
+      port: Number(process.env.DB_PORT) || 5432,
+      database: process.env.DB_NAME || 'wateen_watify',
+      user: process.env.DB_USER || 'postgres',
+      ssl: isProduction ? { rejectUnauthorized: false } : false,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    };
+
+// Only add password if it exists and we're using the field-based config.
+if (!databaseUrl && process.env.DB_PASSWORD && process.env.DB_PASSWORD.trim() !== '') {
   dbConfig.password = process.env.DB_PASSWORD;
 }
 

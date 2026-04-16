@@ -628,47 +628,39 @@ const Login = () => {
 
     
 
-          {/* Development Helper */}
-          <Box sx={{ 
-            mt: 2, 
-            p: 2, 
-            backgroundColor: isDarkMode ? theme.palette.background.default : '#FFF3E0', 
-            borderRadius: 2,
-            border: isDarkMode ? `1px solid ${theme.palette.divider}` : 'none',
-            transition: 'all 0.3s ease'
-          }}>
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
-                display: 'block',
-                fontWeight: 600,
-                mb: 0.5,
-                transition: 'color 0.3s ease'
-              }}
-            >
-              Test Credentials:
-            </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
-                display: 'block',
-                transition: 'color 0.3s ease'
-              }}
-            >
-              Email: alihassan.iqbal101@gmail.com
-            </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
-                transition: 'color 0.3s ease'
-              }}
-            >
-              Password: ah2003ah
-            </Typography>
-          </Box>
+          {process.env.NODE_ENV === 'development' && (
+            <Box sx={{ 
+              mt: 2, 
+              p: 2, 
+              backgroundColor: isDarkMode ? theme.palette.background.default : '#FFF3E0', 
+              borderRadius: 2,
+              border: isDarkMode ? `1px solid ${theme.palette.divider}` : 'none',
+              transition: 'all 0.3s ease'
+            }}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
+                  display: 'block',
+                  fontWeight: 600,
+                  mb: 0.5,
+                  transition: 'color 0.3s ease'
+                }}
+              >
+                Development helper:
+              </Typography>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
+                  display: 'block',
+                  transition: 'color 0.3s ease'
+                }}
+              >
+                Set ADMIN_EMAIL and ADMIN_PASSWORD in your env to seed a login.
+              </Typography>
+            </Box>
+          )}
         </Paper>
       </Box>
 

@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: watify
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm install && npm install --prefix frontend && npm run build --prefix frontend
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: ADMIN_NAME
+        value: Portfolio Admin
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: WHATSAPP_AUTO_START
+        value: "true"

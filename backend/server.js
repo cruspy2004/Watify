@@ -2,40 +2,47 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
+const path = require('path');
 const { testConnection, createTables } = require('./scripts/initDB');
+const { seedAdminUser } = require('./scripts/seedAdmin');
+const MigrationManager = require('./scripts/migrate');
 const { initializeWhatsApp } = require('./config/whatsapp');
 
 // Load environment variables
 dotenv.config();
 
-// Set default environment variables if not provided
-if (!process.env.JWT_SECRET) {
-  process.env.JWT_SECRET = 'watify_super_secret_jwt_key_2024_change_in_production_very_secure_token';
-}
-if (!process.env.JWT_EXPIRE) {
-  process.env.JWT_EXPIRE = '7d';
-}
-if (!process.env.DB_USER) {
-  process.env.DB_USER = 'postgres';
-}
-if (!process.env.DB_PASSWORD) {
-  process.env.DB_PASSWORD = 'alihassan';
-}
-if (!process.env.DB_NAME) {
-  process.env.DB_NAME = 'postgres';
-}
-
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
+const isProduction = process.env.NODE_ENV === 'production';
+const frontendBuildPath = path.join(__dirname, '..', 'frontend', 'build');
+const shouldAutoStartWhatsApp = process.env.WHATSAPP_AUTO_START !== 'false';
+
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET is required to start the server');
+}
 
 // Middleware
-app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
+
+const allowedOrigins = [process.env.CLIENT_URL, process.env.FRONTEND_URL].filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || !allowedOrigins.length || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Routes
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.json({ 
     message: 'Welcome to Wateen Watify API',
     status: 'Server is running successfully!'
@@ -60,6 +67,10 @@ app.use('/api/messages', require('./routes/messages'));
 app.use('/api/campaigns', require('./routes/campaigns'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/whatsapp', require('./routes/whatsapp'));
+
+if (isProduction) {
+  app.use(express.static(frontendBuildPath));
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -1,6 +1,9 @@
 # WhatsApp session files
 .wwebjs_auth/
 .wwebjs_auth_debug/
+backend/.wwebjs_auth/
+backend/.wwebjs_cache/
+frontend/build-verify/
 
 # Node modules
 node_modules/
@@ -10,10 +13,14 @@ yarn-error.log*
 
 # Environment variables
 .env
+.env.*
+!.env.example
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+backend/.env
+frontend/.env
 
 # Logs
 logs

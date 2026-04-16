@@ -1,10 +1,12 @@
 // API Configuration - Now fully dynamic!
+const defaultApiBaseUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5001';
+
 export const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001',
+  BASE_URL: process.env.REACT_APP_API_BASE_URL || defaultApiBaseUrl,
   TIMEOUT: parseInt(process.env.REACT_APP_API_TIMEOUT) || 10000,
   
   // Dynamic URL builder
-  buildUrl: (endpoint) => `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'}${endpoint}`,
+  buildUrl: (endpoint) => `${process.env.REACT_APP_API_BASE_URL || defaultApiBaseUrl}${endpoint}`,
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/api/auth/login',

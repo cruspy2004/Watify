@@ -4,7 +4,7 @@
   "description": "Full-stack application with React frontend, Node.js/Express backend, and PostgreSQL database",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/server.js",
+    "start": "node backend/server.prod.js",
     "dev": "nodemon backend/server.js",
     "test": "jest",
     "test:watch": "jest --watch",
