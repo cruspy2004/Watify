@@ -1,44 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  Avatar,
   Box,
-  Grid,
   Card,
   CardContent,
-  Typography,
   CircularProgress,
-  Avatar,
-  Select,
-  MenuItem,
-  FormControl,
-  Chip,
-  Paper,
+  Grid,
   LinearProgress,
+  Paper,
+  Typography,
   useTheme
 } from '@mui/material';
 import {
-  TrendingUp,
-  TrendingDown,
-  ShowChart,
-  People,
+  AudioFile,
+  Description,
+  Image,
   Message,
+  People,
   Phone,
-  Videocam,
+  ShowChart,
   SmartToy,
   TextSnippet,
-  Image,
+  TrendingUp,
   VideoFile,
-  Description,
-  AudioFile
+  Videocam
 } from '@mui/icons-material';
 import { useCustomTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 
+const emptyDashboardData = {
+  today: {
+    outgoing: {
+      text: 0,
+      video: 0,
+      image: 0,
+      document: 0,
+      audio: 0,
+      links: 0,
+      total: 0
+    },
+    incoming: {
+      message: 0,
+      auto_response: 0,
+      audio_call: 0,
+      video_call: 0
+    },
+    errors: {
+      failed: 0
+    }
+  },
+  monthly: {
+    text: 0,
+    video: 0,
+    image: 0,
+    document: 0,
+    audio: 0,
+    auto_response: 0,
+    links: 0,
+    total: 0
+  },
+  subscribers: {
+    total: 0,
+    active: 0,
+    new_today: 0
+  },
+  summary: {
+    success_rate: 0
+  },
+  generated_at: null
+};
+
 const DashboardContent = () => {
   const { isDarkMode } = useCustomTheme();
   const theme = useTheme();
-  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardData, setDashboardData] = useState(emptyDashboardData);
   const [loading, setLoading] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState('June');
 
   useEffect(() => {
     fetchDashboardData();
@@ -48,11 +84,43 @@ const DashboardContent = () => {
     try {
       setLoading(true);
       const response = await api.get('/api/analytics/dashboard');
-      if (response.data.success) {
-        setDashboardData(response.data.data);
+      if (response?.success && response?.data) {
+        setDashboardData({
+          ...emptyDashboardData,
+          ...response.data,
+          today: {
+            ...emptyDashboardData.today,
+            ...response.data.today,
+            outgoing: {
+              ...emptyDashboardData.today.outgoing,
+              ...response.data.today?.outgoing
+            },
+            incoming: {
+              ...emptyDashboardData.today.incoming,
+              ...response.data.today?.incoming
+            },
+            errors: {
+              ...emptyDashboardData.today.errors,
+              ...response.data.today?.errors
+            }
+          },
+          monthly: {
+            ...emptyDashboardData.monthly,
+            ...response.data.monthly
+          },
+          subscribers: {
+            ...emptyDashboardData.subscribers,
+            ...response.data.subscribers
+          },
+          summary: {
+            ...emptyDashboardData.summary,
+            ...response.data.summary
+          }
+        });
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      setDashboardData(emptyDashboardData);
     } finally {
       setLoading(false);
     }
@@ -60,21 +128,21 @@ const DashboardContent = () => {
 
   if (loading) {
     return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
         height="400px"
-        sx={{ 
+        sx={{
           backgroundColor: isDarkMode ? theme.palette.background.default : 'transparent',
           transition: 'background-color 0.3s ease'
         }}
       >
         <Box textAlign="center">
           <CircularProgress size={60} thickness={4} sx={{ color: '#4CAF50', mb: 2 }} />
-          <Typography 
-            variant="h6" 
-            sx={{ 
+          <Typography
+            variant="h6"
+            sx={{
               color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
               transition: 'color 0.3s ease'
             }}
@@ -86,25 +154,28 @@ const DashboardContent = () => {
     );
   }
 
-  // Enhanced mock data
-  const mockData = {
-    today: {
-      outgoing: { text: 96, video: 0, image: 0, document: 0, audio: 0, total: 96 },
-      incoming: { message: 0, auto_response: 0, audio_call: 0, video_call: 0 },
-      errors: { limit_exceeded: 0, no_whatsapp_account: 0, invalid_numbers: 0 }
-    },
-    monthly: { text: 2420, video: 15, image: 32, document: 8, audio: 5, auto_response: 45 },
-    subscribers: { total: 15, active: 12, new_today: 3 }
+  const data = dashboardData;
+  const currentMonthLabel = data.generated_at
+    ? new Date(data.generated_at).toLocaleString('en-US', { month: 'long', year: 'numeric' })
+    : 'Current Month';
+  const monthlyTotal = data.monthly.total || 0;
+  const successRate = Number(data.summary.success_rate || 0);
+  const totalToday = data.today.outgoing.total || 0;
+
+  const getProgress = (count) => {
+    if (!totalToday) {
+      return 0;
+    }
+
+    return Math.round((count / totalToday) * 100);
   };
 
-  const data = dashboardData || mockData;
-
-  const EnhancedStatCard = ({ title, value, color, icon, subtitle, trend, percentage }) => (
-    <Card 
-      sx={{ 
+  const EnhancedStatCard = ({ title, value, color, icon, subtitle }) => (
+    <Card
+      sx={{
         height: '100%',
         borderRadius: 3,
-        background: isDarkMode 
+        background: isDarkMode
           ? `linear-gradient(135deg, ${color}25 0%, ${color}10 100%)`
           : `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
         border: `1px solid ${color}${isDarkMode ? '30' : '20'}`,
@@ -119,40 +190,29 @@ const DashboardContent = () => {
     >
       <CardContent sx={{ p: 3 }}>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-          <Avatar 
-            sx={{ 
-              bgcolor: color, 
-              width: 56, 
+          <Avatar
+            sx={{
+              bgcolor: color,
+              width: 56,
               height: 56,
               boxShadow: `0 4px 12px ${color}40`
             }}
           >
             {icon}
           </Avatar>
-          {trend && (
-            <Chip 
-              icon={trend === 'up' ? <TrendingUp /> : <TrendingDown />}
-              label={`${percentage}%`}
-              size="small"
-              sx={{ 
-                bgcolor: trend === 'up' 
-                  ? (isDarkMode ? '#4CAF5030' : '#4CAF5020')
-                  : (isDarkMode ? '#f4433630' : '#f4433620'),
-                color: trend === 'up' ? '#4CAF50' : '#f44336',
-                fontWeight: 600
-              }}
-            />
-          )}
+          <Typography variant="body2" sx={{ color, fontWeight: 700 }}>
+            Live
+          </Typography>
         </Box>
-        
-        <Typography variant="h3" sx={{ fontWeight: 700, color: color, mb: 1 }}>
+
+        <Typography variant="h3" sx={{ fontWeight: 700, color, mb: 1 }}>
           {typeof value === 'number' ? value.toLocaleString() : value}
         </Typography>
-        
-        <Typography 
-          variant="body1" 
-          sx={{ 
-            fontWeight: 600, 
+
+        <Typography
+          variant="body1"
+          sx={{
+            fontWeight: 600,
             mb: 0.5,
             color: isDarkMode ? theme.palette.text.primary : 'inherit',
             transition: 'color 0.3s ease'
@@ -160,11 +220,11 @@ const DashboardContent = () => {
         >
           {title}
         </Typography>
-        
+
         {subtitle && (
-          <Typography 
-            variant="body2" 
-            sx={{ 
+          <Typography
+            variant="body2"
+            sx={{
               fontSize: '0.85rem',
               color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
               transition: 'color 0.3s ease'
@@ -177,23 +237,25 @@ const DashboardContent = () => {
     </Card>
   );
 
-  const MessageTypeRow = ({ icon, type, count, color, progress }) => (
+  const MessageTypeRow = ({ icon, type, count, color }) => (
     <Box sx={{ mb: 2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
         <Box display="flex" alignItems="center">
-          <Avatar sx={{ 
-            bgcolor: `${color}${isDarkMode ? '30' : '20'}`, 
-            color: color, 
-            width: 32, 
-            height: 32, 
-            mr: 2 
-          }}>
+          <Avatar
+            sx={{
+              bgcolor: `${color}${isDarkMode ? '30' : '20'}`,
+              color,
+              width: 32,
+              height: 32,
+              mr: 2
+            }}
+          >
             {icon}
           </Avatar>
-          <Typography 
-            variant="body1" 
-            sx={{ 
-              fontSize: '0.95rem', 
+          <Typography
+            variant="body1"
+            sx={{
+              fontSize: '0.95rem',
               fontWeight: 500,
               color: isDarkMode ? theme.palette.text.primary : 'inherit',
               transition: 'color 0.3s ease'
@@ -202,30 +264,28 @@ const DashboardContent = () => {
             {type}
           </Typography>
         </Box>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: color }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color }}>
           {count}
         </Typography>
       </Box>
-      {progress && (
-        <LinearProgress 
-          variant="determinate" 
-          value={progress} 
-          sx={{ 
-            height: 6, 
-            borderRadius: 3,
-            bgcolor: `${color}${isDarkMode ? '20' : '10'}`,
-            '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 3 }
-          }}
-        />
-      )}
+      <LinearProgress
+        variant="determinate"
+        value={getProgress(count)}
+        sx={{
+          height: 6,
+          borderRadius: 3,
+          bgcolor: `${color}${isDarkMode ? '20' : '10'}`,
+          '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 3 }
+        }}
+      />
     </Box>
   );
 
   const CircularChart = ({ total }) => (
-    <Box 
-      sx={{ 
-        position: 'relative', 
-        width: 200, 
+    <Box
+      sx={{
+        position: 'relative',
+        width: 200,
         height: 200,
         display: 'flex',
         alignItems: 'center',
@@ -249,17 +309,17 @@ const DashboardContent = () => {
             height: 120,
             borderRadius: '50%',
             backgroundColor: isDarkMode ? theme.palette.background.paper : '#fff',
-            boxShadow: isDarkMode 
+            boxShadow: isDarkMode
               ? 'inset 0 0 20px rgba(255,255,255,0.05)'
               : 'inset 0 0 20px rgba(0,0,0,0.1)',
             transition: 'all 0.3s ease'
           }
         }}
       >
-        <Typography 
-          variant="h4" 
-          sx={{ 
-            fontWeight: 700, 
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
             color: '#4CAF50',
             position: 'relative',
             zIndex: 1
@@ -272,19 +332,19 @@ const DashboardContent = () => {
   );
 
   const MetricCard = ({ title, value, icon, color, subtitle }) => (
-    <Paper 
+    <Paper
       elevation={3}
-      sx={{ 
-        p: 3, 
+      sx={{
+        p: 3,
         borderRadius: 3,
-        background: isDarkMode 
+        background: isDarkMode
           ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`
-          : `linear-gradient(135deg, #fff 0%, #f8f9fa 100%)`,
+          : 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
         border: isDarkMode ? `1px solid ${theme.palette.divider}` : 'none',
         transition: 'all 0.3s ease',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: isDarkMode 
+          boxShadow: isDarkMode
             ? '0 8px 25px rgba(0,0,0,0.3)'
             : '0 8px 25px rgba(0,0,0,0.1)'
         }
@@ -292,19 +352,12 @@ const DashboardContent = () => {
     >
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Box>
-          <Typography 
-            variant="h4" 
-            sx={{ 
-              fontWeight: 700, 
-              color: color, 
-              mb: 1 
-            }}
-          >
+          <Typography variant="h4" sx={{ fontWeight: 700, color, mb: 1 }}>
             {typeof value === 'number' ? value.toLocaleString() : value}
           </Typography>
-          <Typography 
-            variant="body1" 
-            sx={{ 
+          <Typography
+            variant="body1"
+            sx={{
               fontWeight: 600,
               color: isDarkMode ? theme.palette.text.primary : 'inherit',
               transition: 'color 0.3s ease'
@@ -313,9 +366,9 @@ const DashboardContent = () => {
             {title}
           </Typography>
           {subtitle && (
-            <Typography 
-              variant="body2" 
-              sx={{ 
+            <Typography
+              variant="body2"
+              sx={{
                 color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
                 mt: 0.5,
                 transition: 'color 0.3s ease'
@@ -325,12 +378,12 @@ const DashboardContent = () => {
             </Typography>
           )}
         </Box>
-        <Avatar 
-          sx={{ 
-            bgcolor: `${color}20`, 
-            color: color, 
-            width: 56, 
-            height: 56 
+        <Avatar
+          sx={{
+            bgcolor: `${color}20`,
+            color,
+            width: 56,
+            height: 56
           }}
         >
           {icon}
@@ -340,20 +393,19 @@ const DashboardContent = () => {
   );
 
   return (
-    <Box 
-      sx={{ 
-        p: 4, 
+    <Box
+      sx={{
+        p: 4,
         minHeight: '100vh',
         backgroundColor: isDarkMode ? theme.palette.background.default : 'transparent',
         transition: 'background-color 0.3s ease'
       }}
     >
-      {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography 
-          variant="h4" 
-          sx={{ 
-            fontWeight: 700, 
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
             mb: 1,
             color: isDarkMode ? theme.palette.text.primary : '#1a1a1a',
             transition: 'color 0.3s ease'
@@ -361,19 +413,18 @@ const DashboardContent = () => {
         >
           Dashboard Overview
         </Typography>
-        <Typography 
-          variant="body1" 
-          sx={{ 
+        <Typography
+          variant="body1"
+          sx={{
             color: isDarkMode ? theme.palette.text.secondary : '#666',
             fontSize: '1.1rem',
             transition: 'color 0.3s ease'
           }}
         >
-          Welcome back! Here's what's happening with your messages today.
+          Live project data from your local portfolio environment.
         </Typography>
       </Box>
 
-      {/* Today's Stats */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <EnhancedStatCard
@@ -382,35 +433,29 @@ const DashboardContent = () => {
             color="#4CAF50"
             icon={<Message />}
             subtitle="Sent today"
-            trend="up"
-            percentage="12"
           />
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <EnhancedStatCard
             title="Active Subscribers"
             value={data.subscribers.active}
             color="#2196F3"
             icon={<People />}
-            subtitle="Online now"
-            trend="up"
-            percentage="8"
+            subtitle="Current active records"
           />
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <EnhancedStatCard
             title="Success Rate"
-            value="98.5%"
+            value={`${successRate}%`}
             color="#FF9800"
             icon={<ShowChart />}
-            subtitle="Delivery rate"
-            trend="up"
-            percentage="2"
+            subtitle="Based on tracked message status"
           />
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <EnhancedStatCard
             title="New Subscribers"
@@ -418,18 +463,14 @@ const DashboardContent = () => {
             color="#9C27B0"
             icon={<TrendingUp />}
             subtitle="Added today"
-            trend="up"
-            percentage="25"
           />
         </Grid>
       </Grid>
 
-      {/* Detailed Analytics */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        {/* Message Breakdown */}
         <Grid item xs={12} md={6}>
-          <Card 
-            sx={{ 
+          <Card
+            sx={{
               height: '100%',
               backgroundColor: isDarkMode ? theme.palette.background.paper : 'inherit',
               border: isDarkMode ? `1px solid ${theme.palette.divider}` : 'none',
@@ -437,65 +478,59 @@ const DashboardContent = () => {
             }}
           >
             <CardContent sx={{ p: 3 }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 600, 
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
                   mb: 3,
                   color: isDarkMode ? theme.palette.text.primary : 'inherit',
                   transition: 'color 0.3s ease'
                 }}
               >
-                Today's Message Types
+                Today&apos;s Message Types
               </Typography>
-              
+
               <MessageTypeRow
                 icon={<TextSnippet />}
                 type="Text Messages"
                 count={data.today.outgoing.text}
                 color="#4CAF50"
-                progress={85}
               />
-              
+
               <MessageTypeRow
                 icon={<Image />}
-                type="Images"
+                type="Media Attachments"
                 count={data.today.outgoing.image}
                 color="#2196F3"
-                progress={5}
               />
-              
+
               <MessageTypeRow
                 icon={<VideoFile />}
                 type="Videos"
                 count={data.today.outgoing.video}
                 color="#FF9800"
-                progress={3}
               />
-              
+
               <MessageTypeRow
                 icon={<Description />}
                 type="Documents"
                 count={data.today.outgoing.document}
                 color="#9C27B0"
-                progress={4}
               />
-              
+
               <MessageTypeRow
                 icon={<AudioFile />}
                 type="Audio"
                 count={data.today.outgoing.audio}
                 color="#F44336"
-                progress={3}
               />
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Monthly Overview */}
         <Grid item xs={12} md={6}>
-          <Card 
-            sx={{ 
+          <Card
+            sx={{
               height: '100%',
               backgroundColor: isDarkMode ? theme.palette.background.paper : 'inherit',
               border: isDarkMode ? `1px solid ${theme.palette.divider}` : 'none',
@@ -504,9 +539,9 @@ const DashboardContent = () => {
           >
             <CardContent sx={{ p: 3 }}>
               <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
+                <Typography
+                  variant="h6"
+                  sx={{
                     fontWeight: 600,
                     color: isDarkMode ? theme.palette.text.primary : 'inherit',
                     transition: 'color 0.3s ease'
@@ -514,47 +549,30 @@ const DashboardContent = () => {
                 >
                   Monthly Performance
                 </Typography>
-                <FormControl size="small">
-                  <Select
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    sx={{
-                      minWidth: 120,
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: isDarkMode ? theme.palette.divider : 'inherit'
-                      },
-                      '& .MuiSelect-select': {
-                        color: isDarkMode ? theme.palette.text.primary : 'inherit'
-                      }
-                    }}
-                  >
-                    <MenuItem value="June">June</MenuItem>
-                    <MenuItem value="May">May</MenuItem>
-                    <MenuItem value="April">April</MenuItem>
-                  </Select>
-                </FormControl>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#4CAF50' }}>
+                  {currentMonthLabel}
+                </Typography>
               </Box>
-              
+
               <Box display="flex" alignItems="center" justifyContent="center" mb={3}>
-                <CircularChart total={data.monthly.text} />
+                <CircularChart total={monthlyTotal} />
               </Box>
-              
-              <Typography 
-                variant="body2" 
-                align="center" 
-                sx={{ 
+
+              <Typography
+                variant="body2"
+                align="center"
+                sx={{
                   color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
                   transition: 'color 0.3s ease'
                 }}
               >
-                Total messages sent this month: <strong>{data.monthly.text.toLocaleString()}</strong>
+                Total messages sent this month: <strong>{monthlyTotal.toLocaleString()}</strong>
               </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Additional Metrics */}
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6} md={4}>
           <MetricCard
@@ -562,10 +580,10 @@ const DashboardContent = () => {
             value={data.monthly.auto_response}
             icon={<SmartToy />}
             color="#4CAF50"
-            subtitle="Automated replies sent"
+            subtitle="Automated replies tracked"
           />
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={4}>
           <MetricCard
             title="Video Calls"
@@ -575,7 +593,7 @@ const DashboardContent = () => {
             subtitle="Incoming calls today"
           />
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={4}>
           <MetricCard
             title="Phone Calls"
@@ -590,4 +608,4 @@ const DashboardContent = () => {
   );
 };
 
-export default DashboardContent; 
+export default DashboardContent;

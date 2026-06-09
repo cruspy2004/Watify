@@ -74,6 +74,7 @@ import { whatsappGroupApi } from '../services/whatsappApi';
 import { API_CONFIG } from '../utils/config';
 import EditGroupForm from '../components/whatsapp/EditGroupForm';
 import { useLocation } from 'react-router-dom';
+import PortfolioNotice from '../components/PortfolioNotice';
 
 const DRAWER_WIDTH = 280;
 
@@ -913,7 +914,7 @@ const Dashboard = () => {
                 transition: 'color 0.3s ease'
               }}
             >
-              {user?.name || 'Wateen'} (alih...)
+              {user?.name || 'Portfolio User'}
             </Typography>
             <Typography 
               variant="caption" 
@@ -927,7 +928,7 @@ const Dashboard = () => {
                 transition: 'color 0.3s ease'
               }}
             >
-              haadheesheeraz2004
+              {user?.email || 'Local portfolio access'}
             </Typography>
           </Box>
         </Box>
@@ -1106,6 +1107,16 @@ const Dashboard = () => {
           transition: 'background-color 0.3s ease'
         }}
       >
+        <PortfolioNotice
+          sx={{
+            mx: isMobile ? 2 : 3,
+            mt: isMobile ? 2 : 3,
+            mb: -1,
+            position: 'relative',
+            zIndex: 1
+          }}
+        />
+
         {/* Desktop Logout Button - Top Right */}
         {!isMobile && (
           <Box

@@ -24,6 +24,7 @@ import { useCustomTheme } from '../../contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Settings from '../Settings';
+import PortfolioNotice from '../PortfolioNotice';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -401,6 +402,8 @@ const Login = () => {
           >
             Please provide credentials to login to portal
           </Typography>
+
+          <PortfolioNotice sx={{ mb: 3 }} />
 
           {/* Error Alert */}
           {error && (

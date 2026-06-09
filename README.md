@@ -1,3 +1,5 @@
+SINCE IT IS A B2B APP IT ONLY WORKS ON WATEENS IP but to get a feel of what the product is you can use the vercel link 
+
 # 📱 Watify - WhatsApp Business Automation Platform
 
 A powerful full-stack application for WhatsApp business automation, group management, and bulk messaging using WhatsApp Web integration.

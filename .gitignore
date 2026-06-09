@@ -1,6 +1,8 @@
 # WhatsApp session files
 .wwebjs_auth/
 .wwebjs_auth_debug/
+.local-postgres/
+.codex-logs/
 
 # Node modules
 node_modules/

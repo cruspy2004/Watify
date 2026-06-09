@@ -104,57 +104,12 @@ const getActivityData = async (req, res) => {
 // Get complete dashboard data (combined endpoint)
 const getCompleteDashboard = async (req, res) => {
   try {
-    // Mock data for demonstration purposes (based on your screenshot)
-    const mockData = {
-      today: {
-        outgoing: {
-          text: 96,
-          video: 0,
-          image: 0,
-          document: 0,
-          audio: 0,
-          total: 96
-        },
-        incoming: {
-          message: 0,
-          auto_response: 0,
-          audio_call: 0,
-          video_call: 0
-        },
-        errors: {
-          limit_exceeded: 0,
-          no_whatsapp_account: 0,
-          invalid_numbers: 0
-        }
-      },
-      monthly: {
-        text: 2420,
-        video: 0,
-        image: 0,
-        document: 0,
-        audio: 0,
-        auto_response: 0,
-        total: 2420
-      },
-      subscribers: {
-        total: 15,
-        active: 15
-      },
-      activity: [
-        { date: '2024-06-15', text: 150, image: 10, video: 5, document: 2, total: 167 },
-        { date: '2024-06-16', text: 200, image: 15, video: 8, document: 3, total: 226 },
-        { date: '2024-06-17', text: 180, image: 12, video: 6, document: 4, total: 202 },
-        { date: '2024-06-18', text: 220, image: 18, video: 10, document: 5, total: 253 },
-        { date: '2024-06-19', text: 160, image: 8, video: 4, document: 2, total: 174 },
-        { date: '2024-06-20', text: 190, image: 14, video: 7, document: 3, total: 214 },
-        { date: '2024-06-21', text: 210, image: 16, video: 9, document: 6, total: 241 }
-      ]
-    };
+    const dashboardData = await Analytics.getDashboardData();
     
     res.status(200).json({
       success: true,
       message: 'Complete dashboard data retrieved successfully',
-      data: mockData
+      data: dashboardData
     });
   } catch (error) {
     console.error('Error getting complete dashboard:', error);

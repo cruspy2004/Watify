@@ -2,6 +2,7 @@ const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
+const isHeadless = process.env.WHATSAPP_HEADLESS === 'true';
 
 // Session directory for storing WhatsApp session data
 const SESSION_DIR = path.join(__dirname, '..', '.wwebjs_auth');
@@ -18,7 +19,7 @@ const clientConfig = {
         dataPath: SESSION_DIR
     }),
     puppeteer: {
-        headless: true,
+        headless: isHeadless,
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -47,14 +48,10 @@ const clientConfig = {
         ignoreDefaultArgs: ['--disable-extensions'],
         defaultViewport: null
     },
-    webVersionCache: {
-        type: 'remote',
-        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
-    },
     authTimeoutMs: 60000,
-    qrMaxRetries: 5,
-    restartOnAuthFail: true,
-    takeoverOnConflict: false,
+    qrMaxRetries: 10,
+    restartOnAuthFail: false,
+    takeoverOnConflict: true,
     takeoverTimeoutMs: 30000,
     session: 'watify-session'
 };
@@ -203,7 +200,11 @@ client.on('auth_failure', (msg) => {
     client.emit('auth_failed', msg);
     
     // Auto-restart if within retry limits
-    if (clientState.connectionAttempts < clientState.maxRetries && !clientState.restartInProgress) {
+    if (
+        clientState.connectionAttempts < clientState.maxRetries &&
+        !clientState.restartInProgress &&
+        !String(msg || '').toLowerCase().includes('qr')
+    ) {
         console.log(`🔄 Attempting to restart client (${clientState.connectionAttempts}/${clientState.maxRetries})`);
         setTimeout(() => {
             restartClient();
@@ -213,6 +214,7 @@ client.on('auth_failure', (msg) => {
 
 client.on('disconnected', (reason) => {
     console.log('🔌 WhatsApp client disconnected:', reason);
+    const wasAuthenticated = clientState.isAuthenticated;
     
     clientState.isReady = false;
     clientState.isAuthenticated = false;
@@ -228,7 +230,7 @@ client.on('disconnected', (reason) => {
     client.emit('client_disconnected', reason);
     
     // Auto-reconnect for certain disconnection reasons
-    if (reason === 'NAVIGATION' || reason === 'TIMEOUT') {
+    if (wasAuthenticated && (reason === 'NAVIGATION' || reason === 'TIMEOUT')) {
         console.log('🔄 Attempting to reconnect due to navigation/timeout...');
         setTimeout(() => {
             if (!clientState.restartInProgress) {
