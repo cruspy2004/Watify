@@ -56,7 +56,10 @@ import {
   AudioFile as AudioIcon,
   PictureAsPdf as PdfIcon,
   Description as DocIcon,
-  QrCode as QrCodeIcon
+  QrCode as QrCodeIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  SwapHoriz as MoveSidebarIcon
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useCustomTheme } from '../contexts/ThemeContext';
@@ -598,6 +601,10 @@ const Dashboard = () => {
   
   // State for mobile drawer
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Desktop sidebar controls
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarPosition, setSidebarPosition] = useState('left');
   
   // State for selected menu item
   const [selectedItem, setSelectedItem] = useState('dashboard');
@@ -627,6 +634,10 @@ const Dashboard = () => {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const toggleSidebarPosition = () => {
+    setSidebarPosition(prev => (prev === 'left' ? 'right' : 'left'));
   };
 
   // Function to handle viewing group details
@@ -712,10 +723,10 @@ const Dashboard = () => {
             }}
             sx={{
               backgroundColor: isSelected 
-                ? (isDarkMode ? 'rgba(129, 199, 132, 0.15)' : '#e8f5e8')
+                ? 'rgba(255, 255, 255, 0.16)'
                 : 'transparent',
               borderLeft: isSelected 
-                ? '4px solid #4CAF50' 
+                ? '4px solid #ffffff' 
                 : '4px solid transparent',
               px: 3,
               py: 1.5,
@@ -724,16 +735,16 @@ const Dashboard = () => {
               transition: 'all 0.2s ease',
               '&:hover': {
                 backgroundColor: isSelected 
-                  ? (isDarkMode ? 'rgba(129, 199, 132, 0.15)' : '#e8f5e8')
-                  : (isDarkMode ? 'rgba(255, 255, 255, 0.05)' : '#f8f9fa')
+                  ? 'rgba(255, 255, 255, 0.18)'
+                  : 'rgba(255, 255, 255, 0.10)'
               }
             }}
           >
             <ListItemIcon 
               sx={{ 
                 color: isSelected 
-                  ? '#4CAF50' 
-                  : (isDarkMode ? muiTheme.palette.text.secondary : '#666'),
+                  ? '#ffffff' 
+                  : 'rgba(255, 255, 255, 0.78)',
                 minWidth: 36,
                 fontSize: '1.2rem'
               }}
@@ -747,8 +758,8 @@ const Dashboard = () => {
                   fontSize: '0.9rem',
                   fontWeight: isSelected ? 600 : 500,
                   color: isSelected 
-                    ? '#4CAF50' 
-                    : (isDarkMode ? muiTheme.palette.text.primary : '#333'),
+                    ? '#ffffff' 
+                    : 'rgba(255, 255, 255, 0.88)',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
@@ -758,7 +769,7 @@ const Dashboard = () => {
             {item.expandable && (
               <Box sx={{ 
                 ml: 1, 
-                color: isDarkMode ? muiTheme.palette.text.secondary : '#666', 
+                color: 'rgba(255, 255, 255, 0.74)', 
                 display: 'flex', 
                 alignItems: 'center' 
               }}>
@@ -782,16 +793,14 @@ const Dashboard = () => {
                         pr: 3,
                         py: 1,
                         backgroundColor: isSubSelected 
-                          ? (isDarkMode ? 'rgba(129, 199, 132, 0.15)' : '#e8f5e8')
+                          ? 'rgba(255, 255, 255, 0.16)'
                           : 'transparent',
                         borderLeft: isSubSelected 
-                          ? '4px solid #4CAF50' 
+                          ? '4px solid #ffffff' 
                           : '4px solid transparent',
                         transition: 'all 0.2s ease',
                         '&:hover': {
-                          backgroundColor: isDarkMode 
-                            ? 'rgba(255, 255, 255, 0.05)' 
-                            : '#f8f9fa'
+                          backgroundColor: 'rgba(255, 255, 255, 0.10)'
                         }
                       }}
                     >
@@ -801,8 +810,8 @@ const Dashboard = () => {
                           fontSize: '0.85rem',
                           fontWeight: isSubSelected ? 600 : 400,
                           color: isSubSelected 
-                            ? '#4CAF50' 
-                            : (isDarkMode ? muiTheme.palette.text.secondary : '#666'),
+                            ? '#ffffff' 
+                            : 'rgba(255, 255, 255, 0.76)',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis'
@@ -825,18 +834,20 @@ const Dashboard = () => {
     <Box sx={{ 
       width: DRAWER_WIDTH, 
       height: '100%', 
-      backgroundColor: isDarkMode ? muiTheme.palette.background.paper : '#ffffff',
+      background: 'linear-gradient(180deg, #0f7a45 0%, #0b5f37 52%, #073f27 100%)',
+      color: '#ffffff',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
-      transition: 'background-color 0.3s ease'
+      boxShadow: isMobile ? 'none' : '12px 0 28px rgba(5, 58, 35, 0.18)',
+      transition: 'all 0.3s ease'
     }}>
       {/* Header with Logo - Theme-aware Design */}
       <Box 
         sx={{ 
           p: 3,
-          backgroundColor: isDarkMode ? muiTheme.palette.background.paper : '#ffffff',
-          borderBottom: `1px solid ${isDarkMode ? muiTheme.palette.divider : '#f0f0f0'}`,
+          backgroundColor: 'rgba(255, 255, 255, 0.08)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.14)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -847,36 +858,70 @@ const Dashboard = () => {
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
           mb: 3
         }}>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #4CAF50 0%, #81C784 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mr: 2,
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: '1.2rem'
-            }}
-          >
-            W
+          <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+            <Box
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '50%',
+                background: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mr: 1.5,
+                color: '#0b6b3e',
+                fontWeight: 'bold',
+                fontSize: '1.25rem',
+                boxShadow: '0 10px 24px rgba(0, 0, 0, 0.16)'
+              }}
+            >
+              W
+            </Box>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 800,
+                color: '#ffffff',
+                fontSize: '1.45rem',
+                letterSpacing: '0.7px'
+              }}
+            >
+              WATIFY
+            </Typography>
           </Box>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 700,
-              color: '#4CAF50',
-              fontSize: '1.5rem',
-              letterSpacing: '0.5px'
-            }}
-          >
-            WATIFY
-          </Typography>
+
+          {!isMobile && (
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              <IconButton
+                onClick={toggleSidebarPosition}
+                size="small"
+                title={`Move sidebar to the ${sidebarPosition === 'left' ? 'right' : 'left'}`}
+                sx={{
+                  color: '#ffffff',
+                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.22)' }
+                }}
+              >
+                <MoveSidebarIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                onClick={() => setSidebarOpen(false)}
+                size="small"
+                title="Hide sidebar"
+                sx={{
+                  color: '#ffffff',
+                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.22)' }
+                }}
+              >
+                {sidebarPosition === 'left' ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
+              </IconButton>
+            </Box>
+          )}
         </Box>
         
         {/* User Profile Section - Theme-aware Design */}
@@ -885,19 +930,17 @@ const Dashboard = () => {
             display: 'flex', 
             alignItems: 'center', 
             width: '100%',
-            backgroundColor: isDarkMode 
-              ? 'rgba(255, 255, 255, 0.05)' 
-              : '#f8f9fa',
+            backgroundColor: 'rgba(255, 255, 255, 0.12)',
             borderRadius: 2,
             p: 2,
-            border: `1px solid ${isDarkMode ? muiTheme.palette.divider : '#e9ecef'}`,
+            border: '1px solid rgba(255, 255, 255, 0.14)',
             transition: 'all 0.3s ease'
           }}
         >
           <Avatar 
             sx={{ 
-              backgroundColor: '#FF9800', 
-              color: '#ffffff',
+              backgroundColor: '#ffffff', 
+              color: '#0b6b3e',
               width: 36, 
               height: 36,
               fontSize: '1rem',
@@ -916,7 +959,7 @@ const Dashboard = () => {
               variant="body2" 
               sx={{ 
                 fontWeight: 600,
-                color: isDarkMode ? muiTheme.palette.text.primary : '#333',
+                color: '#ffffff',
                 fontSize: '0.9rem',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
@@ -929,7 +972,7 @@ const Dashboard = () => {
             <Typography 
               variant="caption" 
               sx={{ 
-                color: isDarkMode ? muiTheme.palette.text.secondary : '#666',
+                color: 'rgba(255, 255, 255, 0.72)',
                 fontSize: '0.75rem',
                 display: 'block',
                 whiteSpace: 'nowrap',
@@ -1065,17 +1108,18 @@ const Dashboard = () => {
       )}
 
       {/* Desktop Sidebar */}
-      {!isMobile && (
+      {!isMobile && sidebarOpen && sidebarPosition === 'left' && (
         <Drawer
           variant="permanent"
+          anchor="left"
           sx={{
             width: DRAWER_WIDTH,
             flexShrink: 0,
             '& .MuiDrawer-paper': {
               width: DRAWER_WIDTH,
               boxSizing: 'border-box',
-              borderRight: `1px solid ${isDarkMode ? muiTheme.palette.divider : '#e0e0e0'}`,
-              backgroundColor: isDarkMode ? muiTheme.palette.background.paper : '#ffffff',
+              borderRight: '1px solid rgba(255, 255, 255, 0.12)',
+              backgroundColor: 'transparent',
               transition: 'all 0.3s ease'
             },
           }}
@@ -1096,13 +1140,35 @@ const Dashboard = () => {
           sx={{
             '& .MuiDrawer-paper': {
               width: DRAWER_WIDTH,
-              backgroundColor: isDarkMode ? muiTheme.palette.background.paper : '#ffffff',
+              backgroundColor: 'transparent',
               transition: 'background-color 0.3s ease'
             },
           }}
         >
           {drawerContent}
         </Drawer>
+      )}
+
+      {!isMobile && !sidebarOpen && (
+        <IconButton
+          onClick={() => setSidebarOpen(true)}
+          title="Show sidebar"
+          sx={{
+            position: 'fixed',
+            top: 18,
+            [sidebarPosition]: 18,
+            zIndex: muiTheme.zIndex.drawer + 1,
+            color: '#ffffff',
+            background: 'linear-gradient(135deg, #0f7a45 0%, #0b5f37 100%)',
+            boxShadow: '0 14px 30px rgba(5, 58, 35, 0.26)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #12834d 0%, #0c6b3f 100%)',
+              transform: 'translateY(-1px)'
+            }
+          }}
+        >
+          {sidebarPosition === 'left' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+        </IconButton>
       )}
 
       {/* Main Content */}
@@ -1172,6 +1238,26 @@ const Dashboard = () => {
         
         {getPageContent()}
       </Box>
+
+      {!isMobile && sidebarOpen && sidebarPosition === 'right' && (
+        <Drawer
+          variant="permanent"
+          anchor="right"
+          sx={{
+            width: DRAWER_WIDTH,
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              width: DRAWER_WIDTH,
+              boxSizing: 'border-box',
+              borderLeft: '1px solid rgba(255, 255, 255, 0.12)',
+              backgroundColor: 'transparent',
+              transition: 'all 0.3s ease'
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      )}
     </Box>
   );
 };

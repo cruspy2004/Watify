@@ -12,19 +12,18 @@ import {
   useTheme
 } from '@mui/material';
 import {
-  AudioFile,
-  Description,
-  Image,
-  Message,
-  People,
-  Phone,
-  ShowChart,
-  SmartToy,
-  TextSnippet,
-  TrendingUp,
-  VideoFile,
-  Videocam
-} from '@mui/icons-material';
+  Activity,
+  Bot,
+  FileText,
+  Image as ImageIcon,
+  Mic,
+  MessageSquare,
+  PhoneCall,
+  Type,
+  UserPlus,
+  UsersRound,
+  Video
+} from 'lucide-react';
 import { useCustomTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 
@@ -174,17 +173,19 @@ const DashboardContent = () => {
     <Card
       sx={{
         height: '100%',
-        borderRadius: 3,
-        background: isDarkMode
-          ? `linear-gradient(135deg, ${color}25 0%, ${color}10 100%)`
-          : `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
-        border: `1px solid ${color}${isDarkMode ? '30' : '20'}`,
-        backgroundColor: isDarkMode ? theme.palette.background.paper : 'inherit',
+        borderRadius: 2,
+        background: isDarkMode ? '#1f2722' : '#fbfcf8',
+        border: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(22, 101, 52, 0.12)',
+        boxShadow: isDarkMode
+          ? '0 18px 36px rgba(0,0,0,0.28)'
+          : '0 18px 36px rgba(15, 23, 42, 0.10)',
         transition: 'all 0.3s ease',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: `0 8px 25px ${color}${isDarkMode ? '40' : '25'}`,
-          border: `1px solid ${color}${isDarkMode ? '60' : '40'}`
+          transform: 'translateY(-3px)',
+          boxShadow: isDarkMode
+            ? '0 22px 42px rgba(0,0,0,0.34)'
+            : '0 22px 42px rgba(15, 23, 42, 0.14)',
+          borderColor: `${color}${isDarkMode ? '55' : '30'}`
         }
       }}
     >
@@ -192,17 +193,16 @@ const DashboardContent = () => {
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Avatar
             sx={{
-              bgcolor: color,
+              bgcolor: isDarkMode ? `${color}24` : `${color}14`,
+              color,
               width: 56,
               height: 56,
-              boxShadow: `0 4px 12px ${color}40`
+              border: `1px solid ${color}${isDarkMode ? '3d' : '24'}`,
+              boxShadow: 'none'
             }}
           >
             {icon}
           </Avatar>
-          <Typography variant="body2" sx={{ color, fontWeight: 700 }}>
-            Live
-          </Typography>
         </Box>
 
         <Typography variant="h3" sx={{ fontWeight: 700, color, mb: 1 }}>
@@ -247,7 +247,8 @@ const DashboardContent = () => {
               color,
               width: 32,
               height: 32,
-              mr: 2
+              mr: 2,
+              border: `1px solid ${color}${isDarkMode ? '3d' : '24'}`
             }}
           >
             {icon}
@@ -431,7 +432,7 @@ const DashboardContent = () => {
             title="Total Messages"
             value={data.today.outgoing.total}
             color="#4CAF50"
-            icon={<Message />}
+            icon={<MessageSquare size={28} strokeWidth={1.8} />}
             subtitle="Sent today"
           />
         </Grid>
@@ -441,7 +442,7 @@ const DashboardContent = () => {
             title="Active Subscribers"
             value={data.subscribers.active}
             color="#2196F3"
-            icon={<People />}
+            icon={<UsersRound size={28} strokeWidth={1.8} />}
             subtitle="Current active records"
           />
         </Grid>
@@ -451,7 +452,7 @@ const DashboardContent = () => {
             title="Success Rate"
             value={`${successRate}%`}
             color="#FF9800"
-            icon={<ShowChart />}
+            icon={<Activity size={28} strokeWidth={1.8} />}
             subtitle="Based on tracked message status"
           />
         </Grid>
@@ -461,7 +462,7 @@ const DashboardContent = () => {
             title="New Subscribers"
             value={data.subscribers.new_today}
             color="#9C27B0"
-            icon={<TrendingUp />}
+            icon={<UserPlus size={28} strokeWidth={1.8} />}
             subtitle="Added today"
           />
         </Grid>
@@ -491,35 +492,35 @@ const DashboardContent = () => {
               </Typography>
 
               <MessageTypeRow
-                icon={<TextSnippet />}
+                icon={<Type size={18} strokeWidth={1.8} />}
                 type="Text Messages"
                 count={data.today.outgoing.text}
                 color="#4CAF50"
               />
 
               <MessageTypeRow
-                icon={<Image />}
+                icon={<ImageIcon size={18} strokeWidth={1.8} />}
                 type="Media Attachments"
                 count={data.today.outgoing.image}
                 color="#2196F3"
               />
 
               <MessageTypeRow
-                icon={<VideoFile />}
+                icon={<Video size={18} strokeWidth={1.8} />}
                 type="Videos"
                 count={data.today.outgoing.video}
                 color="#FF9800"
               />
 
               <MessageTypeRow
-                icon={<Description />}
+                icon={<FileText size={18} strokeWidth={1.8} />}
                 type="Documents"
                 count={data.today.outgoing.document}
                 color="#9C27B0"
               />
 
               <MessageTypeRow
-                icon={<AudioFile />}
+                icon={<Mic size={18} strokeWidth={1.8} />}
                 type="Audio"
                 count={data.today.outgoing.audio}
                 color="#F44336"
@@ -578,7 +579,7 @@ const DashboardContent = () => {
           <MetricCard
             title="Auto Responses"
             value={data.monthly.auto_response}
-            icon={<SmartToy />}
+            icon={<Bot size={28} strokeWidth={1.8} />}
             color="#4CAF50"
             subtitle="Automated replies tracked"
           />
@@ -588,7 +589,7 @@ const DashboardContent = () => {
           <MetricCard
             title="Video Calls"
             value={data.today.incoming.video_call}
-            icon={<Videocam />}
+            icon={<Video size={28} strokeWidth={1.8} />}
             color="#2196F3"
             subtitle="Incoming calls today"
           />
@@ -598,7 +599,7 @@ const DashboardContent = () => {
           <MetricCard
             title="Phone Calls"
             value={data.today.incoming.audio_call}
-            icon={<Phone />}
+            icon={<PhoneCall size={28} strokeWidth={1.8} />}
             color="#FF9800"
             subtitle="Voice calls received"
           />
