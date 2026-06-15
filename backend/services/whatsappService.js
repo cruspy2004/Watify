@@ -1111,7 +1111,7 @@ class WhatsAppService {
             if (health.isReady && !health.sessionClosed) {
                 try {
                     // Try to get state as a simple connectivity test
-                    const state = client.getState();
+                    const state = await client.getState();
                     connectivityTest = state === 'CONNECTED' ? 'pass' : 'warning';
                 } catch (error) {
                     connectivityTest = error.message.includes('Session closed') ? 'session_closed' : 'fail';

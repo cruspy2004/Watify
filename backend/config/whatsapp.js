@@ -3,6 +3,8 @@ const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
 const isHeadless = process.env.WHATSAPP_HEADLESS === 'true';
+const USER_AGENT = process.env.WHATSAPP_USER_AGENT ||
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36';
 
 // Session directory for storing WhatsApp session data
 const SESSION_DIR = path.join(__dirname, '..', '.wwebjs_auth');
@@ -14,6 +16,7 @@ if (!fs.existsSync(SESSION_DIR)) {
 
 // Enhanced client configuration with better error handling
 const clientConfig = {
+    userAgent: USER_AGENT,
     authStrategy: new LocalAuth({
         clientId: 'watify-client',
         dataPath: SESSION_DIR
@@ -486,18 +489,19 @@ const shutdownClient = async () => {
 // Health check function with session status
 const getClientHealth = () => {
     let clientStateInfo = 'UNKNOWN';
-    
-    try {
-        if (client && !isClientDestroyed && client.getState) {
-            clientStateInfo = client.getState();
-        } else if (isClientDestroyed) {
-            clientStateInfo = 'DESTROYED';
-        } else if (!client) {
-            clientStateInfo = 'NOT_INITIALIZED';
-        }
-    } catch (error) {
-        // Ignore getState errors - client might not be ready
-        clientStateInfo = 'ERROR';
+
+    if (isClientDestroyed) {
+        clientStateInfo = 'DESTROYED';
+    } else if (!client) {
+        clientStateInfo = 'NOT_INITIALIZED';
+    } else if (clientState.isReady) {
+        clientStateInfo = 'CONNECTED';
+    } else if (clientState.qrCode) {
+        clientStateInfo = 'QR_READY';
+    } else if (clientState.restartInProgress) {
+        clientStateInfo = 'RESTARTING';
+    } else {
+        clientStateInfo = 'INITIALIZING';
     }
     
     return {

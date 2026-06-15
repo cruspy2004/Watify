@@ -106,7 +106,7 @@ const SendMessageComponent = () => {
       console.log('🔍 Debug - Token exists:', token ? 'YES' : 'NO');
       console.log('🔍 Debug - Token preview:', token ? token.substring(0, 20) + '...' : 'null');
       console.log('🔍 Debug - Making API call to /api/whatsapp/groups/list');
-      const response = await fetch('/api/whatsapp/groups/list', {
+      const response = await fetch('/api/whatsapp/groups', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -119,11 +119,17 @@ const SendMessageComponent = () => {
       if (response.ok) {
         const result = await response.json();
         console.log('🔍 Debug - Response data:', result);
-        if (result.status === 'success' && Array.isArray(result.data.groups)) {
-          setGroups(result.data.groups);
+        const availableGroups = Array.isArray(result.data)
+          ? result.data
+          : (Array.isArray(result.data?.groups) ? result.data.groups : []);
+
+        if (result.status === 'success') {
+          setGroups(availableGroups);
         } else {
           setGroups([]);
         }
+      } else {
+        setGroups([]);
       }
     } catch (error) {
       console.error('🔍 Debug - Network/Fetch Error:', error);
@@ -215,14 +221,18 @@ const SendMessageComponent = () => {
           message: formData.messageContent
         };
         endpoint = '/api/whatsapp/send-message';
-      } else if (messageType === 'group' || messageType === 'whatsapp_group') {
-        const groupId = messageType === 'group' ? formData.recipientGroup : formData.recipientWhatsAppGroup;
+      } else if (messageType === 'group') {
         requestData = {
-          groupId: groupId,
+          groupId: formData.recipientGroup,
           message: formData.messageContent,
-          groupType: messageType === 'group' ? 'regular' : 'whatsapp'
+          groupType: 'regular'
         };
         endpoint = '/api/whatsapp/send-to-group';
+      } else if (messageType === 'whatsapp_group') {
+        requestData = {
+          message: formData.messageContent
+        };
+        endpoint = `/api/whatsapp/groups/${encodeURIComponent(formData.recipientWhatsAppGroup)}/send-message`;
       }
 
       console.log('📤 Dashboard: Sending message...', { endpoint, requestData });
@@ -292,7 +302,7 @@ const SendMessageComponent = () => {
                   <Box display="flex" alignItems="center" gap={1}>
                     <GroupIcon fontSize="small" />
                     <span>{group.name}</span>
-                    <Chip label={`${group.member_count} members`} size="small" />
+                    <Chip label={`${group.participantCount || group.member_count || 0} members`} size="small" />
                   </Box>
                 </MenuItem>
               ))}
@@ -314,7 +324,7 @@ const SendMessageComponent = () => {
                   <Box display="flex" alignItems="center" gap={1}>
                     <WhatsApp fontSize="small" />
                     <span>{group.name}</span>
-                    <Chip label={`${group.member_count} members`} size="small" />
+                    <Chip label={`${group.participantCount || group.member_count || 0} members`} size="small" />
                   </Box>
                 </MenuItem>
               ))}
