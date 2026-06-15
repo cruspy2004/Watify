@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { apiService } from '../../services/api';
 import './WhatsAppAuth.css';
 
@@ -8,11 +8,12 @@ const WhatsAppAuth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isReady, setIsReady] = useState(false);
+  const [connectionDetails, setConnectionDetails] = useState(null);
 
   useEffect(() => {
     checkStatus();
-    const interval = setInterval(checkStatus, 3000); // Check status every 3 seconds
-    
+    const interval = setInterval(checkStatus, 3000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -20,17 +21,18 @@ const WhatsAppAuth = () => {
     try {
       const response = await apiService.get('/api/whatsapp/status');
       const { state, isReady: ready, hasQR } = response.data;
-      
+
       setStatus(state);
       setIsReady(ready);
-      
+      setConnectionDetails(response.data);
+
       if (hasQR && !ready) {
         await getQRCode();
       } else if (ready) {
         setQrCode(null);
       }
-    } catch (error) {
-      console.error('Error checking WhatsApp status:', error);
+    } catch (statusError) {
+      console.error('Error checking WhatsApp status:', statusError);
       setError('Failed to check WhatsApp status');
     }
   };
@@ -39,16 +41,16 @@ const WhatsAppAuth = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await apiService.get('/api/whatsapp/qr');
-      
+
       if (response.data && response.data.qr) {
         setQrCode(response.data.qr);
       } else {
         setQrCode(null);
       }
-    } catch (error) {
-      console.error('Error getting QR code:', error);
+    } catch (qrError) {
+      console.error('Error getting QR code:', qrError);
       setError('Failed to get QR code');
     } finally {
       setLoading(false);
@@ -59,15 +61,14 @@ const WhatsAppAuth = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       await apiService.post('/api/whatsapp/restart');
-      
-      // Wait a moment then check status
+
       setTimeout(() => {
         checkStatus();
       }, 2000);
-    } catch (error) {
-      console.error('Error restarting WhatsApp client:', error);
+    } catch (restartError) {
+      console.error('Error restarting WhatsApp client:', restartError);
       setError('Failed to restart WhatsApp client');
     } finally {
       setLoading(false);
@@ -75,6 +76,9 @@ const WhatsAppAuth = () => {
   };
 
   const getStatusColor = () => {
+    if (connectionDetails?.isOperational) return 'green';
+    if (isReady) return 'orange';
+
     switch (status) {
       case 'CONNECTED':
         return 'green';
@@ -88,8 +92,9 @@ const WhatsAppAuth = () => {
   };
 
   const getStatusText = () => {
-    if (isReady) return 'Connected & Ready';
-    
+    if (connectionDetails?.isOperational) return 'Connected and operational';
+    if (isReady) return 'Connected, checking health';
+
     switch (status) {
       case 'CONNECTED':
         return 'Connected';
@@ -111,8 +116,8 @@ const WhatsAppAuth = () => {
       <div className="auth-header">
         <h2>WhatsApp Authentication</h2>
         <div className="status-indicator">
-          <span 
-            className="status-dot" 
+          <span
+            className="status-dot"
             style={{ backgroundColor: getStatusColor() }}
           ></span>
           <span className="status-text">{getStatusText()}</span>
@@ -121,18 +126,44 @@ const WhatsAppAuth = () => {
 
       {error && (
         <div className="error-message">
-          <span>⚠️ {error}</span>
-          <button onClick={() => setError(null)}>×</button>
+          <span>{error}</span>
+          <button onClick={() => setError(null)}>Close</button>
         </div>
       )}
 
       <div className="auth-content">
         {isReady ? (
           <div className="connected-state">
-            <div className="success-icon">✅</div>
-            <h3>WhatsApp Connected Successfully!</h3>
-            <p>You can now send messages through WhatsApp.</p>
-            <button 
+            <div className="success-icon" aria-hidden="true"></div>
+            <h3>WhatsApp Connected Successfully</h3>
+            <p>
+              {connectionDetails?.isOperational
+                ? 'The connection is currently working and ready for WhatsApp actions.'
+                : 'The session is connected, but the live health check has not fully passed yet.'}
+            </p>
+            <div className="connection-details">
+              <div>
+                <span>Connected number</span>
+                <strong>{connectionDetails?.connectedPhone || 'Unavailable'}</strong>
+              </div>
+              <div>
+                <span>Account name</span>
+                <strong>{connectionDetails?.connectedName || 'Unavailable'}</strong>
+              </div>
+              <div>
+                <span>Live connectivity</span>
+                <strong>{connectionDetails?.connectivity || 'Unknown'}</strong>
+              </div>
+              <div>
+                <span>Last checked</span>
+                <strong>
+                  {connectionDetails?.checkedAt
+                    ? new Date(connectionDetails.checkedAt).toLocaleTimeString()
+                    : 'Not checked'}
+                </strong>
+              </div>
+            </div>
+            <button
               onClick={restartClient}
               className="restart-btn"
               disabled={loading}
@@ -144,7 +175,7 @@ const WhatsAppAuth = () => {
           <div className="qr-section">
             <h3>Scan QR Code with WhatsApp</h3>
             <p>Open WhatsApp on your phone and scan this QR code to connect.</p>
-            
+
             <div className="qr-container">
               {loading ? (
                 <div className="loading-spinner">
@@ -155,9 +186,9 @@ const WhatsAppAuth = () => {
                 <div className="qr-code">
                   <img src={qrCode} alt="WhatsApp QR Code" />
                   <p className="qr-instructions">
-                    1. Open WhatsApp on your phone<br/>
-                    2. Tap Menu (⋮) → Linked devices<br/>
-                    3. Tap "Link a device"<br/>
+                    1. Open WhatsApp on your phone<br />
+                    2. Tap Menu, then Linked devices<br />
+                    3. Tap "Link a device"<br />
                     4. Scan this QR code
                   </p>
                 </div>
@@ -169,14 +200,14 @@ const WhatsAppAuth = () => {
             </div>
 
             <div className="action-buttons">
-              <button 
+              <button
                 onClick={getQRCode}
                 disabled={loading}
                 className="refresh-btn"
               >
                 {loading ? 'Loading...' : 'Refresh QR Code'}
               </button>
-              <button 
+              <button
                 onClick={restartClient}
                 disabled={loading}
                 className="restart-btn"
@@ -191,4 +222,4 @@ const WhatsAppAuth = () => {
   );
 };
 
-export default WhatsAppAuth; 
+export default WhatsAppAuth;

@@ -3,6 +3,34 @@ const router = express.Router();
 const whatsappService = require('../services/whatsappService');
 const { authenticateToken } = require('../middleware/auth');
 
+const getPhoneFromClientInfo = (clientInfo = {}) => {
+  return clientInfo?.wid?.user || clientInfo?.me?.user || null;
+};
+
+const buildConnectionStatus = async () => {
+  const state = whatsappService.getState();
+  const healthCheck = await whatsappService.performHealthCheck();
+  const clientInfo = state.clientInfo || healthCheck?.health?.clientInfo || healthCheck?.stats?.clientInfo || null;
+  const connectedPhone = getPhoneFromClientInfo(clientInfo);
+  const connectivity = healthCheck?.connectivity || 'unknown';
+  const isOperational = Boolean(state.isReady && !state.sessionClosed && connectivity === 'pass');
+
+  return {
+    ...state,
+    connectedPhone,
+    connectedName: clientInfo?.pushname || null,
+    connectedAccount: connectedPhone ? `${connectedPhone}@c.us` : null,
+    platform: clientInfo?.platform || null,
+    connectivity,
+    isOperational,
+    checkedAt: healthCheck?.timestamp || new Date().toISOString(),
+    diagnostics: {
+      overall: healthCheck?.overall || 'unknown',
+      recommendations: healthCheck?.recommendations || []
+    }
+  };
+};
+
 // Add a public debug endpoint for testing WhatsApp status
 router.get('/debug/status', async (req, res) => {
   try {
@@ -76,7 +104,7 @@ router.post('/debug/restart', async (req, res) => {
 // Get WhatsApp connection status
 router.get('/status', authenticateToken, async (req, res) => {
   try {
-    const state = whatsappService.getState();
+    const state = await buildConnectionStatus();
     res.json({ 
       status: 'success',
       data: state
@@ -120,12 +148,18 @@ router.get('/qr', authenticateToken, async (req, res) => {
 router.get('/groups', authenticateToken, async (req, res) => {
   try {
     // Check if WhatsApp is ready
-    const state = whatsappService.getState();
-    if (!state.isReady) {
+    const state = await buildConnectionStatus();
+    if (!state.isOperational) {
       return res.status(503).json({
         status: 'error',
-        message: 'WhatsApp client is not ready. Please authenticate first.',
-        data: { state: state.state, hasQR: state.hasQR }
+        message: 'WhatsApp connection is not operational. Please reconnect WhatsApp and try again.',
+        data: {
+          state: state.state,
+          hasQR: state.hasQR,
+          connectedPhone: state.connectedPhone,
+          connectivity: state.connectivity,
+          diagnostics: state.diagnostics
+        }
       });
     }
 
@@ -162,7 +196,16 @@ router.get('/groups', authenticateToken, async (req, res) => {
     res.json({
       status: 'success',
       message: 'WhatsApp groups retrieved successfully',
-      data: allChats
+      data: {
+        groups: allChats,
+        totalGroups: allChats.length,
+        connection: {
+          connectedPhone: state.connectedPhone,
+          connectedName: state.connectedName,
+          connectivity: state.connectivity,
+          checkedAt: state.checkedAt
+        }
+      }
     });
   } catch (error) {
     console.error('Error getting WhatsApp groups:', error);

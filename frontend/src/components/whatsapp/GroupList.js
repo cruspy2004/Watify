@@ -71,7 +71,9 @@ const GroupList = ({ onViewGroupDetails }) => {
       const result = await whatsappGroupApi.getRealWhatsAppGroups();
       
       if (result.status === 'success') {
-        let filteredGroups = result.data.groups || [];
+        let filteredGroups = Array.isArray(result.data)
+          ? result.data
+          : (result.data?.groups || []);
         
         // Apply search filter if provided
         if (search.trim()) {
@@ -105,7 +107,7 @@ const GroupList = ({ onViewGroupDetails }) => {
       setAlert({
         show: true,
         type: 'error',
-        message: 'Failed to fetch groups. Please ensure WhatsApp is connected.'
+        message: error.message || 'Failed to fetch groups. Please ensure WhatsApp is connected and operational.'
       });
     } finally {
       setLoading(false);
@@ -407,10 +409,10 @@ const GroupList = ({ onViewGroupDetails }) => {
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <GroupIcon sx={{ fontSize: 64, color: muiTheme.palette.text.disabled }} />
                       <Typography variant="h6" sx={{ color: muiTheme.palette.text.secondary }}>
-                        No Data
+                        No groups found
                       </Typography>
                       <Typography variant="body2" sx={{ color: muiTheme.palette.text.disabled }}>
-                        No groups found
+                        This connected WhatsApp account does not have matching groups.
                       </Typography>
                     </Box>
                   </TableCell>
