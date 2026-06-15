@@ -76,7 +76,7 @@ export const whatsappGroupApi = {
   },
 
   getGroupOptions: async () => {
-    console.log('🔍 Fetching group options from:', `${API_BASE_URL}/options`);
+    console.log('Fetching group options from:', `${API_BASE_URL}/options`);
     const response = await fetch(`${API_BASE_URL}/options`, {
       headers: getAuthHeaders()
     });
@@ -263,7 +263,7 @@ export const whatsappGroupApi = {
 
   // Get real WhatsApp groups from connected WhatsApp client
   getRealWhatsAppGroups: async () => {
-    console.log('🔍 Fetching real WhatsApp groups...');
+    console.log('Fetching real WhatsApp groups...');
     const response = await fetch(`${WHATSAPP_API_BASE_URL}/groups`, {
       headers: getAuthHeaders()
     });
@@ -272,7 +272,7 @@ export const whatsappGroupApi = {
 
   // Get all WhatsApp chats (groups + individuals)
   getWhatsAppChats: async () => {
-    console.log('🔍 Fetching WhatsApp chats...');
+    console.log('Fetching WhatsApp chats...');
     const response = await fetch(`${WHATSAPP_API_BASE_URL}/chats`, {
       headers: getAuthHeaders()
     });

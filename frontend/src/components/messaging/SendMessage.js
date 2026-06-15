@@ -105,7 +105,7 @@ const SendMessage = () => {
   const [debugInfo, setDebugInfo] = useState({});
 
   useEffect(() => {
-    console.log('🔄 SendMessage component mounted, fetching groups...');
+    console.log('SendMessage component mounted, fetching groups...');
     fetchAvailableGroups();
     updateDebugInfo();
   }, []);
@@ -148,28 +148,28 @@ const SendMessage = () => {
       ...options
     };
 
-    console.log(`🌐 Making request to: ${url}`);
-    console.log(`🔑 Using token: ${token.substring(0, 20)}...`);
+    console.log(`Making request to: ${url}`);
+    console.log(`Using token: ${token.substring(0, 20)}...`);
 
     const response = await fetch(url, defaultOptions);
     
-    console.log(`📡 Response status: ${response.status}`);
-    console.log(`📡 Response ok: ${response.ok}`);
+    console.log(`Response status: ${response.status}`);
+    console.log(`Response ok: ${response.ok}`);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ Request failed: ${response.status} - ${errorText}`);
+      console.error(`Request failed: ${response.status} - ${errorText}`);
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
-    console.log(`📦 Response data:`, data);
+    console.log(`Response data:`, data);
     return data;
   };
 
   const fetchAvailableGroups = async () => {
     try {
-      console.log('🔍 Starting to fetch groups...');
+      console.log('Starting to fetch groups...');
       setMessage({ type: '', text: '' });
 
       // Check authentication first
@@ -182,29 +182,29 @@ const SendMessage = () => {
         return;
       }
 
-      console.log('✅ Token found, fetching groups...');
+      console.log('Token found, fetching groups...');
 
       // Fetch real WhatsApp groups using the new API
       const result = await makeAuthenticatedRequest('/api/whatsapp/groups/list');
 
       if (result.status === 'success' && result.data && Array.isArray(result.data.groups)) {
-        console.log(`✅ Successfully fetched ${result.data.groups.length} real WhatsApp groups`);
+        console.log(`Successfully fetched ${result.data.groups.length} real WhatsApp groups`);
         setGroups(result.data.groups);
         setWhatsappGroups(result.data.groups); // Use same data for both for now
         
         if (result.data.groups.length > 0) {
           setMessage({ 
             type: 'success', 
-            text: `✅ Found ${result.data.groups.length} real WhatsApp groups available for messaging` 
+            text: `Found ${result.data.groups.length} real WhatsApp groups available for messaging` 
           });
         } else {
           setMessage({ 
             type: 'info', 
-            text: 'ℹ️ No WhatsApp groups found. You may need to create groups first or ensure WhatsApp is connected.' 
+            text: 'No WhatsApp groups found. You may need to create groups first or ensure WhatsApp is connected.' 
           });
         }
       } else {
-        console.warn('⚠️ Invalid response structure:', result);
+        console.warn('Invalid response structure:', result);
         setGroups([]);
         setWhatsappGroups([]);
         setMessage({ 
@@ -216,7 +216,7 @@ const SendMessage = () => {
       updateDebugInfo();
 
     } catch (error) {
-      console.error('❌ Error fetching groups:', error);
+      console.error('Error fetching groups:', error);
       setGroups([]);
       setWhatsappGroups([]);
       setMessage({ 
@@ -237,7 +237,7 @@ const SendMessage = () => {
         const { isReady, isAuthenticated, clientInfo } = result.data;
         setMessage({ 
           type: 'success', 
-          text: `✅ WhatsApp Status: ${isReady ? 'Ready' : 'Not Ready'}, Auth: ${isAuthenticated ? 'Yes' : 'No'}${clientInfo ? `, User: ${clientInfo.pushname}` : ''}` 
+          text: `WhatsApp Status: ${isReady ? 'Ready' : 'Not Ready'}, Auth: ${isAuthenticated ? 'Yes' : 'No'}${clientInfo ? `, User: ${clientInfo.pushname}` : ''}` 
         });
       } else {
         setMessage({ 
@@ -345,7 +345,7 @@ const SendMessage = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      console.log('📤 Starting message send process...');
+      console.log('Starting message send process...');
       
       let requestData = {};
       let endpoint = '';
@@ -357,7 +357,7 @@ const SendMessage = () => {
           message: formData.messageContent
         };
         endpoint = '/api/whatsapp/send-message';
-        console.log('📱 Sending individual message');
+        console.log('Sending individual message');
       } else if (messageType === 'group' || messageType === 'whatsapp_group') {
         const groupId = messageType === 'group' ? formData.recipientGroup : formData.recipientWhatsAppGroup;
         requestData = {
@@ -366,10 +366,10 @@ const SendMessage = () => {
           groupType: messageType === 'group' ? 'regular' : 'whatsapp'
         };
         endpoint = '/api/whatsapp/send-to-group';
-        console.log(`👥 Sending ${messageType} message to group ${groupId}`);
+        console.log(`Sending ${messageType} message to group ${groupId}`);
       }
 
-      console.log('📤 Request data:', requestData);
+      console.log('Request data:', requestData);
 
       const result = await makeAuthenticatedRequest(endpoint, {
         method: 'POST',
@@ -381,11 +381,11 @@ const SendMessage = () => {
       
       if (isSuccess) {
         const successMessage = result.message || 'Message sent successfully!';
-        console.log('✅ Message sent successfully:', successMessage);
+        console.log('Message sent successfully:', successMessage);
         
         setMessage({ 
           type: 'success', 
-          text: `🎉 ${successMessage}` 
+          text: successMessage 
         });
         
         // Reset form
@@ -404,10 +404,10 @@ const SendMessage = () => {
       }
 
     } catch (error) {
-      console.error('❌ Error sending message:', error);
+      console.error('Error sending message:', error);
       setMessage({ 
         type: 'error', 
-        text: `❌ Failed to send message: ${error.message}` 
+        text: `Failed to send message: ${error.message}` 
       });
     } finally {
       setLoading(false);
@@ -610,11 +610,11 @@ const SendMessage = () => {
         <Card sx={{ mb: 3, backgroundColor: '#f5f5f5' }}>
           <CardContent>
             <Typography variant="h6" color="primary" gutterBottom>
-              🔧 Debug Information
+              Debug Information
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              <strong>Token:</strong> {debugInfo.hasToken ? '✅ Present' : '❌ Missing'}<br />
-              <strong>User:</strong> {debugInfo.hasUser ? `✅ ${debugInfo.userName}` : '❌ Not found'}<br />
+              <strong>Token:</strong> {debugInfo.hasToken ? 'Present' : 'Missing'}<br />
+              <strong>User:</strong> {debugInfo.hasUser ? debugInfo.userName : 'Not found'}<br />
               <strong>Groups:</strong> {debugInfo.groupsCount || 0} loaded<br />
               <strong>WhatsApp Groups:</strong> {debugInfo.whatsappGroupsCount || 0} loaded<br />
               <strong>URL:</strong> {debugInfo.currentUrl}<br />

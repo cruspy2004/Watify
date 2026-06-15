@@ -89,12 +89,12 @@ const DebugInfo = () => {
     <Card sx={{ mb: 2 }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          🔧 Debug Information
+          Debug Information
         </Typography>
         
         <Box mb={2}>
           <Typography variant="body2">
-            <strong>Token:</strong> {info.hasToken ? '✅ Present' : '❌ Missing'}<br />
+            <strong>Token:</strong> {info.hasToken ? 'Present' : 'Missing'}<br />
             <strong>Preview:</strong> {info.tokenPreview}<br />
             <strong>URL:</strong> {info.currentUrl}<br />
             <strong>Updated:</strong> {info.timestamp}

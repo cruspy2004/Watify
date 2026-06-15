@@ -176,7 +176,7 @@ const AddMembersToGroup = () => {
   const ResultsSummary = ({ summary }) => (
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6" gutterBottom>
-        📊 Summary
+        Summary
       </Typography>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
         <Chip 
@@ -226,7 +226,7 @@ const AddMembersToGroup = () => {
                   {React.cloneElement(icon, { color })}
                 </ListItemIcon>
                 <ListItemText
-                  primary={`📞 ${item.phone}`}
+                  primary={item.phone}
                   secondary={item.message}
                 />
               </ListItem>
@@ -272,7 +272,7 @@ const AddMembersToGroup = () => {
                   <Box>
                     <Typography variant="body1">
                       {group.name} 
-                      {group.isAdmin && ' 👑'}
+                      {group.isAdmin && ' Admin'}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Members: {group.participantCount || 0} | Admin: {group.isAdmin ? 'Yes' : 'No'}
@@ -326,7 +326,7 @@ const AddMembersToGroup = () => {
         {result && (
           <Box sx={{ mt: 4 }}>
             <Typography variant="h6" gutterBottom>
-              📱 Results for "{getSelectedGroupName()}"
+              Results for "{getSelectedGroupName()}"
             </Typography>
             
             <ResultsSummary summary={result.summary} />
@@ -363,13 +363,13 @@ const AddMembersToGroup = () => {
 
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2">
-                <strong>💡 Tips:</strong>
+                <strong>Tips:</strong>
                 <br />
-                • Check your WhatsApp app to see the new members
+                - Check your WhatsApp app to see the new members
                 <br />
-                • "Private Invitations" are sent to users who restrict automatic group additions
+                - "Private Invitations" are sent to users who restrict automatic group additions
                 <br />
-                • Failed additions may be due to invalid numbers or privacy settings
+                - Failed additions may be due to invalid numbers or privacy settings
               </Typography>
             </Alert>
           </Box>
@@ -377,7 +377,7 @@ const AddMembersToGroup = () => {
 
         <Box sx={{ mt: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
           <Typography variant="h6" gutterBottom>
-            📋 Instructions
+            Instructions
           </Typography>
           <Typography variant="body2" color="text.secondary">
             1. Select a WhatsApp group from the dropdown<br />

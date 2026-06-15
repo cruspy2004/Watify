@@ -340,7 +340,7 @@ const AddMember = () => {
             ) : (
               groups.map((group) => (
                 <MenuItem key={group.id} value={group.id}>
-                  {group.name} ({group.participantCount} members) {group.isAdmin && '👑'}
+                  {group.name} ({group.participantCount} members) {group.isAdmin && 'Admin'}
                 </MenuItem>
               ))
             )}

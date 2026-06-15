@@ -111,7 +111,7 @@ const RealWhatsAppGroups = () => {
     setAlert({ show: false });
 
     try {
-      console.log('📱 Loading real WhatsApp groups...');
+      console.log('Loading real WhatsApp groups...');
       const response = await whatsappGroupApi.getRealWhatsAppGroups();
 
       if (response.status === 'success') {
@@ -442,7 +442,7 @@ const RealWhatsAppGroups = () => {
         <Card sx={{ mb: 3 }}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              📱 Connected WhatsApp Account
+              Connected WhatsApp Account
             </Typography>
             <Typography variant="body2">
               <strong>Number:</strong> {whatsappInfo.connectedNumber}
@@ -462,7 +462,7 @@ const RealWhatsAppGroups = () => {
         <Card sx={{ mb: 3 }}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              📊 Statistics
+              Statistics
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={6} md={3}>

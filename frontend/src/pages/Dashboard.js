@@ -106,9 +106,9 @@ const SendMessageComponent = () => {
   const fetchAvailableGroups = async () => {
     try {
       const token = localStorage.getItem('wateen_watify_token');
-      console.log('🔍 Debug - Token exists:', token ? 'YES' : 'NO');
-      console.log('🔍 Debug - Token preview:', token ? token.substring(0, 20) + '...' : 'null');
-      console.log('🔍 Debug - Making API call to /api/whatsapp/groups/list');
+      console.log('Debug - Token exists:', token ? 'YES' : 'NO');
+      console.log('Debug - Token preview:', token ? token.substring(0, 20) + '...' : 'null');
+      console.log('Debug - Making API call to /api/whatsapp/groups/list');
       const response = await fetch('/api/whatsapp/groups', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -116,12 +116,12 @@ const SendMessageComponent = () => {
         }
       });
 
-      console.log('🔍 Debug - Response status:', response.status);
-      console.log('🔍 Debug - Response ok:', response.ok);
+      console.log('Debug - Response status:', response.status);
+      console.log('Debug - Response ok:', response.ok);
       
       if (response.ok) {
         const result = await response.json();
-        console.log('🔍 Debug - Response data:', result);
+        console.log('Debug - Response data:', result);
         const availableGroups = Array.isArray(result.data)
           ? result.data
           : (Array.isArray(result.data?.groups) ? result.data.groups : []);
@@ -135,7 +135,7 @@ const SendMessageComponent = () => {
         setGroups([]);
       }
     } catch (error) {
-      console.error('🔍 Debug - Network/Fetch Error:', error);
+      console.error('Debug - Network/Fetch Error:', error);
       setMessage({ type: 'error', text: 'Failed to load groups. Please check your login status.' });
     }
   };
@@ -238,7 +238,7 @@ const SendMessageComponent = () => {
         endpoint = `/api/whatsapp/groups/${encodeURIComponent(formData.recipientWhatsAppGroup)}/send-message`;
       }
 
-      console.log('📤 Dashboard: Sending message...', { endpoint, requestData });
+      console.log('Dashboard: Sending message...', { endpoint, requestData });
 
       const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
         method: 'POST',
@@ -250,10 +250,10 @@ const SendMessageComponent = () => {
       });
 
       const result = await response.json();
-      console.log('📬 Dashboard: Response received:', result);
+      console.log('Dashboard: Response received:', result);
 
       if (response.ok && (result.status === 'success' || result.success)) {
-        setMessage({ type: 'success', text: `✅ ${result.message || 'Message sent successfully!'}` });
+        setMessage({ type: 'success', text: result.message || 'Message sent successfully!' });
         
         // Reset form
         setFormData({
@@ -269,8 +269,8 @@ const SendMessageComponent = () => {
         throw new Error(result.message || result.error || 'Failed to send message');
       }
     } catch (error) {
-      console.error('❌ Dashboard: Error sending message:', error);
-      setMessage({ type: 'error', text: `❌ Failed to send message: ${error.message}` });
+      console.error('Dashboard: Error sending message:', error);
+      setMessage({ type: 'error', text: `Failed to send message: ${error.message}` });
     } finally {
       setLoading(false);
     }

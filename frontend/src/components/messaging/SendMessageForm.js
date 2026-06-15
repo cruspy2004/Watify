@@ -57,7 +57,7 @@ const SendMessageForm = () => {
   const fetchAvailableGroups = async () => {
     try {
       const token = localStorage.getItem('wateen_watify_token');
-      console.log('🔍 Fetching real WhatsApp groups...');
+      console.log('Fetching real WhatsApp groups...');
       
       // Fetch real WhatsApp groups using the new API
       const response = await fetch('/api/whatsapp/groups/list', {
@@ -69,24 +69,24 @@ const SendMessageForm = () => {
 
       if (response.ok) {
         const result = await response.json();
-        console.log('📋 Real WhatsApp groups fetched:', result);
+        console.log('Real WhatsApp groups fetched:', result);
         
         if (result.status === 'success' && Array.isArray(result.data.groups)) {
           setGroups(result.data.groups);
           setWhatsappGroups(result.data.groups); // Use same data for both
         } else {
-          console.error('❌ Invalid response structure:', result);
+          console.error('Invalid response structure:', result);
           setGroups([]);
           setWhatsappGroups([]);
         }
       } else {
-        console.error('❌ Failed to fetch WhatsApp groups:', response.status);
+        console.error('Failed to fetch WhatsApp groups:', response.status);
         setGroups([]);
         setWhatsappGroups([]);
       }
 
     } catch (error) {
-      console.error('❌ Error fetching groups:', error);
+      console.error('Error fetching groups:', error);
       setMessage({ type: 'error', text: 'Failed to load groups. Please check your connection.' });
     }
   };
@@ -231,7 +231,7 @@ const SendMessageForm = () => {
         endpoint = '/api/whatsapp/send-bulk';
       }
 
-      console.log('📤 Sending message:', { endpoint, requestData });
+      console.log('Sending message:', { endpoint, requestData });
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -265,7 +265,7 @@ const SendMessageForm = () => {
       }
 
     } catch (error) {
-      console.error('❌ Error sending message:', error);
+      console.error('Error sending message:', error);
       setMessage({ 
         type: 'error', 
         text: error.message || 'Failed to send message. Please try again.' 

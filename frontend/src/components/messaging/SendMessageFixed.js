@@ -45,7 +45,7 @@ const SendMessageFixed = () => {
   const fetchGroups = async () => {
     try {
       const token = localStorage.getItem('wateen_watify_token');
-      console.log('🔍 Fetching real WhatsApp groups with token:', token ? 'Present' : 'Missing');
+      console.log('Fetching real WhatsApp groups with token:', token ? 'Present' : 'Missing');
       
       if (!token) {
         setMessage({ type: 'error', text: 'Please log in to view groups' });
@@ -59,11 +59,11 @@ const SendMessageFixed = () => {
         }
       });
 
-      console.log('📡 Response:', response.status, response.ok);
+      console.log('Response:', response.status, response.ok);
 
       if (response.ok) {
         const result = await response.json();
-        console.log('📦 Data:', result);
+        console.log('Data:', result);
         
         if (result.status === 'success' && Array.isArray(result.data.groups)) {
           setGroups(result.data.groups);
@@ -74,11 +74,11 @@ const SendMessageFixed = () => {
         }
       } else {
         const errorText = await response.text();
-        console.error('❌ Error:', errorText);
+        console.error('Error:', errorText);
         setMessage({ type: 'error', text: `Failed to fetch groups: ${errorText}` });
       }
     } catch (error) {
-      console.error('❌ Exception:', error);
+      console.error('Exception:', error);
       setMessage({ type: 'error', text: `Error: ${error.message}` });
     }
   };
@@ -121,7 +121,7 @@ const SendMessageFixed = () => {
         };
       }
 
-      console.log('📤 Sending:', endpoint, body);
+      console.log('Sending:', endpoint, body);
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -133,7 +133,7 @@ const SendMessageFixed = () => {
       });
 
       const result = await response.json();
-      console.log('📬 Result:', result);
+      console.log('Result:', result);
 
       if (response.ok && (result.status === 'success' || result.success)) {
         setMessage({ type: 'success', text: 'Message sent successfully!' });
@@ -147,7 +147,7 @@ const SendMessageFixed = () => {
         setMessage({ type: 'error', text: result.message || 'Failed to send message' });
       }
     } catch (error) {
-      console.error('❌ Send error:', error);
+      console.error('Send error:', error);
       setMessage({ type: 'error', text: `Send failed: ${error.message}` });
     } finally {
       setLoading(false);
@@ -164,7 +164,7 @@ const SendMessageFixed = () => {
         }
       });
       const result = await response.json();
-      console.log('🧪 Connection test:', result);
+      console.log('Connection test:', result);
       setMessage({ 
         type: response.ok ? 'success' : 'error', 
         text: `Connection test: ${response.status} - ${JSON.stringify(result)}` 
@@ -186,7 +186,7 @@ const SendMessageFixed = () => {
           <CardContent>
             <Typography variant="h6" gutterBottom>Debug Info</Typography>
             <Typography variant="body2">
-              Token: {localStorage.getItem('wateen_watify_token') ? '✅ Present' : '❌ Missing'}<br/>
+              Token: {localStorage.getItem('wateen_watify_token') ? 'Present' : 'Missing'}<br/>
               Groups: {groups.length} loaded<br/>
               URL: {window.location.href}
             </Typography>

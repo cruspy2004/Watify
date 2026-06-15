@@ -149,7 +149,7 @@ const Login = () => {
       }
       
       // Success feedback
-      toast.success('🎉 Login successful! Welcome to Watify', {
+      toast.success('Login successful! Welcome to Watify', {
         position: "top-center",
         autoClose: 3000,
         hideProgressBar: false,
@@ -169,7 +169,7 @@ const Login = () => {
       // Security: Clear password field on failed login
       setFormData(prev => ({ ...prev, password: '' }));
       
-      toast.error('🔒 ' + errorMessage, {
+      toast.error(errorMessage, {
         position: "top-center",
         autoClose: 5000,
       });
