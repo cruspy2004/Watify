@@ -1,6 +1,8 @@
 const heroStage = document.querySelector('#heroStage');
 const heroCurtain = document.querySelector('.hero-curtain');
-const lockRevealButton = document.querySelector('#lockRevealButton');
+const ribbonSection = document.querySelector('.features-section');
+const ribbonPath = document.querySelector('#ribbonPathActive');
+const ribbonPoint = document.querySelector('#ribbonPoint');
 
 const connectionPill = document.querySelector('#connectionPill');
 const phoneValue = document.querySelector('#phoneValue');
@@ -10,14 +12,16 @@ const healthValue = document.querySelector('#healthValue');
 const groupResult = document.querySelector('#groupResult');
 const tableResult = document.querySelector('#tableResult');
 const messageResult = document.querySelector('#messageResult');
-const messagesMetric = document.querySelector('#messagesMetric');
-const groupsMetric = document.querySelector('#groupsMetric');
-const successMetric = document.querySelector('#successMetric');
 const groupTableBody = document.querySelector('#groupTableBody');
 const groupSearchInput = document.querySelector('#groupSearchInput');
+const quickActionOutput = document.querySelector('#quickActionOutput');
 
-let messageCount = 0;
-let revealLocked = false;
+const quickMessages = {
+  connect: 'WhatsApp verified. The admin can safely continue.',
+  group: 'Group created. Members are ready for review.',
+  send: 'Message sent. The result is tracked in the dashboard.',
+  track: 'Metrics updated. Admin work is now visible.'
+};
 
 heroStage?.addEventListener('mousemove', (event) => {
   const rect = heroStage.getBoundingClientRect();
@@ -28,10 +32,10 @@ heroStage?.addEventListener('mousemove', (event) => {
   heroCurtain.style.setProperty('--my', y);
 });
 
-lockRevealButton?.addEventListener('click', () => {
-  revealLocked = !revealLocked;
-  heroStage.classList.toggle('is-revealed', revealLocked);
-  lockRevealButton.textContent = revealLocked ? 'Release dashboard reveal' : 'Hold dashboard reveal';
+document.querySelectorAll('[data-quick-action]').forEach((button) => {
+  button.addEventListener('click', () => {
+    quickActionOutput.textContent = quickMessages[button.dataset.quickAction] || 'Action completed.';
+  });
 });
 
 document.querySelectorAll('[data-demo-action]').forEach((button) => {
@@ -51,7 +55,6 @@ document.querySelectorAll('[data-demo-action]').forEach((button) => {
       const name = document.querySelector('#groupNameInput').value.trim() || 'New WhatsApp Group';
       groupResult.textContent = `${name} created with 3 participants.`;
       groupResult.classList.add('success');
-      groupsMetric.textContent = '3';
       button.textContent = 'Group created';
     }
 
@@ -59,16 +62,13 @@ document.querySelectorAll('[data-demo-action]').forEach((button) => {
       const query = groupSearchInput.value.trim();
       tableResult.textContent = query
         ? `Showing groups matching "${query}".`
-        : '2 groups loaded from dummy WhatsApp data.';
+        : '2 groups loaded.';
       tableResult.classList.add('success');
     }
 
     if (action === 'message') {
-      messageCount += 1;
-      messageResult.textContent = 'Message sent successfully through the dummy workflow.';
+      messageResult.textContent = 'Message sent successfully through Watify.';
       messageResult.classList.add('success');
-      messagesMetric.textContent = String(messageCount);
-      successMetric.textContent = '100%';
       button.textContent = 'Message sent';
     }
   });
@@ -90,3 +90,32 @@ groupSearchInput?.addEventListener('input', () => {
     row.style.display = name.includes(query) ? '' : 'none';
   });
 });
+
+const setupRibbon = () => {
+  if (!ribbonPath || !ribbonPoint) return;
+
+  const pathLength = ribbonPath.getTotalLength();
+  ribbonPath.style.strokeDasharray = pathLength;
+  ribbonPath.style.strokeDashoffset = pathLength;
+
+  const updateRibbon = () => {
+    if (!ribbonSection) return;
+
+    const rect = ribbonSection.getBoundingClientRect();
+    const scrollable = rect.height - window.innerHeight;
+    const rawProgress = (window.innerHeight - rect.top) / (scrollable + window.innerHeight);
+    const progress = Math.max(0, Math.min(1, rawProgress));
+    const drawLength = pathLength * progress;
+    const point = ribbonPath.getPointAtLength(drawLength);
+
+    ribbonPath.style.strokeDashoffset = pathLength - drawLength;
+    ribbonPoint.setAttribute('cx', point.x);
+    ribbonPoint.setAttribute('cy', point.y);
+  };
+
+  updateRibbon();
+  window.addEventListener('scroll', updateRibbon, { passive: true });
+  window.addEventListener('resize', updateRibbon);
+};
+
+setupRibbon();
