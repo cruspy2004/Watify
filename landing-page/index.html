@@ -13,150 +13,240 @@
       <span>Watify</span>
     </a>
     <nav class="nav-links" aria-label="Primary navigation">
-      <a href="#features">Features</a>
-      <a href="#workflow">Workflow</a>
-      <a href="#demo">Demo</a>
+      <a href="#whatsapp">Connect</a>
+      <a href="#groups">Groups</a>
+      <a href="#messages">Messages</a>
+      <a href="#how">How to use</a>
     </nav>
-    <a class="header-cta" href="#demo">Try the flow</a>
+    <a class="header-cta" href="#whatsapp">Start demo</a>
   </header>
 
   <main id="top">
-    <section class="hero-section" aria-labelledby="hero-title">
-      <div class="hero-copy">
-        <p class="eyebrow">WhatsApp operations without the spreadsheet chaos</p>
-        <h1 id="hero-title">Run WhatsApp groups, messages, and subscribers from one admin dashboard.</h1>
-        <p class="hero-lead">
-          Watify turns repetitive WhatsApp admin work into controlled workflows:
-          connect, create, send, track, and verify from a single full-stack dashboard.
+    <section class="hero-section" id="heroStage" aria-labelledby="hero-title">
+      <div class="dashboard-underlay" aria-label="Dashboard preview revealed on hover">
+        <aside class="mock-sidebar">
+          <div class="mock-logo"><span>W</span><strong>WATIFY</strong></div>
+          <div class="mock-user"><span>H</span><div><strong>Haadhee Sheeraz</strong><small>portfolio access</small></div></div>
+          <ul>
+            <li class="active">Dashboard</li>
+            <li>WhatsApp Setup</li>
+            <li>Create Group</li>
+            <li>List Groups</li>
+            <li>Send Message</li>
+            <li>Subscribers</li>
+          </ul>
+        </aside>
+        <section class="mock-dashboard">
+          <div class="portfolio-note">Portfolio demo connected to local backend data.</div>
+          <div class="mock-metrics">
+            <article><span>0</span><strong>Total Messages</strong><small>Sent today</small></article>
+            <article><span>0</span><strong>Active Subscribers</strong><small>Current records</small></article>
+            <article><span>0%</span><strong>Success Rate</strong><small>Tracked status</small></article>
+            <article><span>0</span><strong>New Subscribers</strong><small>Added today</small></article>
+          </div>
+          <div class="mock-content-grid">
+            <div class="mock-card">
+              <h3>Today's Message Types</h3>
+              <p><span class="dot green"></span> Text Messages <strong>0</strong></p>
+              <p><span class="dot blue"></span> Media Attachments <strong>0</strong></p>
+              <p><span class="dot amber"></span> Videos <strong>0</strong></p>
+              <p><span class="dot red"></span> Audio <strong>0</strong></p>
+            </div>
+            <div class="mock-card ring-card">
+              <h3>Monthly Performance</h3>
+              <div class="ring">0</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="hero-curtain">
+        <div class="hero-copy">
+          <p class="eyebrow">Watify for WhatsApp operations</p>
+          <h1 id="hero-title">whatsapp reimagined for admins</h1>
+          <p>
+            A full-stack admin dashboard for connecting WhatsApp Web, validating the live session,
+            creating groups, sending messages, and tracking operational data without spreadsheet chaos.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-button" href="#groups">Explore admin flows</a>
+            <button class="ghost-button" id="lockRevealButton" type="button">Hold dashboard reveal</button>
+          </div>
+        </div>
+        <div class="hover-hint">
+          <span></span>
+          <p>Move your mouse across the green surface to reveal the dashboard underneath.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="statement-strip">
+      <p>Watify makes admin-heavy WhatsApp work feel like a controlled product workflow, not a scattered set of manual chores.</p>
+    </section>
+
+    <section class="product-section" id="whatsapp">
+      <div class="section-copy">
+        <p class="eyebrow">Connection validation</p>
+        <h2>Know exactly which WhatsApp account is connected.</h2>
+        <p>
+          The real project validates the WhatsApp Web session before sensitive actions.
+          This dummy interface gives the same feeling: QR login, phone identity, and live health status.
         </p>
-        <div class="hero-actions">
-          <a class="primary-button" href="#features">Explore features</a>
-          <button class="secondary-button" id="pulseDashboardButton" type="button">Reveal dashboard</button>
-        </div>
       </div>
-
-      <div class="hero-reveal" id="heroReveal">
-        <div class="dashboard-preview" aria-label="Watify dashboard preview">
-          <aside class="preview-sidebar">
-            <div class="preview-logo">
-              <span>W</span>
-              <strong>Watify</strong>
-            </div>
-            <div class="preview-user">
-              <span>H</span>
-              <div>
-                <strong>Admin</strong>
-                <small>portfolio access</small>
-              </div>
-            </div>
-            <ul>
-              <li class="active">Dashboard</li>
-              <li>WhatsApp Setup</li>
-              <li>Create Group</li>
-              <li>List Groups</li>
-              <li>Send Message</li>
-            </ul>
-          </aside>
-          <section class="preview-main">
-            <div class="notice-bar">Portfolio demo connected to local backend data.</div>
-            <div class="metric-grid">
-              <article><span>0</span><small>Total Messages</small></article>
-              <article><span>0</span><small>Active Subscribers</small></article>
-              <article><span>0%</span><small>Success Rate</small></article>
-              <article><span>0</span><small>New Subscribers</small></article>
-            </div>
-            <div class="preview-panels">
-              <div class="panel message-panel">
-                <h3>Today's Message Types</h3>
-                <p><span></span> Text Messages <strong>0</strong></p>
-                <p><span></span> Media Attachments <strong>0</strong></p>
-                <p><span></span> Documents <strong>0</strong></p>
-              </div>
-              <div class="panel chart-panel">
-                <h3>Monthly Performance</h3>
-                <div class="ring">0</div>
-              </div>
-            </div>
-          </section>
+      <div class="product-panel whatsapp-panel">
+        <div class="panel-header">
+          <div><strong>WhatsApp Authentication</strong><small>Session monitor</small></div>
+          <span class="status-pill" id="connectionPill">Disconnected</span>
         </div>
-        <div class="hero-cover">
-          <p>Hover here</p>
-          <h2>Simple outside. Operational underneath.</h2>
-          <span>Move your cursor over this card to reveal the dashboard.</span>
+        <div class="qr-layout">
+          <div class="qr-box">
+            <div class="fake-qr">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <small>Dummy QR preview</small>
+          </div>
+          <div class="connection-cards">
+            <article><span>Connected number</span><strong id="phoneValue">Unavailable</strong></article>
+            <article><span>Account name</span><strong id="nameValue">Unavailable</strong></article>
+            <article><span>Live connectivity</span><strong id="healthValue">Not checked</strong></article>
+          </div>
         </div>
+        <button class="panel-button" type="button" data-demo-action="connect">Run connection check</button>
       </div>
     </section>
 
-    <section class="pain-strip" aria-label="Watify value statement">
-      <p>Admin work should not feel like tab-hopping, copy-pasting, and hoping the right people got the right message.</p>
-    </section>
-
-    <section class="features-section" id="features" aria-labelledby="features-title">
-      <div class="section-heading">
-        <p class="eyebrow">Interactive product moments</p>
-        <h2 id="features-title">Feel each workflow before opening the app.</h2>
+    <section class="product-section alternate" id="groups">
+      <div class="section-copy">
+        <p class="eyebrow">Group creation</p>
+        <h2>As an admin, creating groups should not be a hassle.</h2>
+        <p>
+          Watify turns a messy group setup into a form-based flow. Name the group, paste members,
+          create once, and let the system prepare the result.
+        </p>
       </div>
-
-      <div class="feature-grid">
-        <article class="feature-card" data-feature-card>
-          <div class="feature-icon">01</div>
-          <h3>Creating groups is a hassle.</h3>
-          <p>Create a WhatsApp group from a prepared member list, without rebuilding the same setup manually.</p>
-          <button type="button" data-action="group">Create group</button>
-          <output>Ready to create</output>
-        </article>
-
-        <article class="feature-card" data-feature-card>
-          <div class="feature-icon">02</div>
-          <h3>Broadcasts get messy fast.</h3>
-          <p>Choose a group, write the message once, and send through the connected WhatsApp session.</p>
-          <button type="button" data-action="message">Send campaign</button>
-          <output>Campaign drafted</output>
-        </article>
-
-        <article class="feature-card" data-feature-card>
-          <div class="feature-icon">03</div>
-          <h3>Connection status should be obvious.</h3>
-          <p>See the connected phone number and whether WhatsApp Web is actually operational right now.</p>
-          <button type="button" data-action="health">Check connection</button>
-          <output>Waiting for health check</output>
-        </article>
-
-        <article class="feature-card" data-feature-card>
-          <div class="feature-icon">04</div>
-          <h3>Subscribers need structure.</h3>
-          <p>Track active subscribers and new records so the dashboard reflects what is really happening.</p>
-          <button type="button" data-action="subscriber">Add subscriber</button>
-          <output>No new subscriber yet</output>
-        </article>
+      <div class="product-panel create-group-panel">
+        <div class="breadcrumb">Dashboard / WhatsApp / Create Group</div>
+        <h3>Create WhatsApp Group</h3>
+        <label>
+          Group name
+          <input id="groupNameInput" type="text" value="June Leads" />
+        </label>
+        <label>
+          Participants
+          <textarea id="participantsInput">923001111111
+923002222222
+923003333333</textarea>
+        </label>
+        <div class="form-row">
+          <span>3 valid numbers detected</span>
+          <button class="panel-button" type="button" data-demo-action="group">Create group</button>
+        </div>
+        <div class="inline-result" id="groupResult">Waiting for group creation.</div>
       </div>
     </section>
 
-    <section class="workflow-section" id="workflow" aria-labelledby="workflow-title">
+    <section class="product-section" id="list">
+      <div class="section-copy">
+        <p class="eyebrow">Group list</p>
+        <h2>See WhatsApp groups like an admin table, not a phone scroll.</h2>
+        <p>
+          The landing page mirrors the real List Groups feel: search, status, member count, and action menus.
+          It is dummy data, but the interaction model matches the app.
+        </p>
+      </div>
+      <div class="product-panel table-panel">
+        <div class="panel-toolbar">
+          <input id="groupSearchInput" type="search" placeholder="Search by group name..." />
+          <button class="panel-button compact" type="button" data-demo-action="search">Search</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Group ID</th>
+              <th>Group</th>
+              <th>Members</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="groupTableBody">
+            <tr>
+              <td>ID# 101</td>
+              <td>June Leads</td>
+              <td>24</td>
+              <td><span class="table-status">Active</span></td>
+              <td><button type="button" data-row-action>View</button></td>
+            </tr>
+            <tr>
+              <td>ID# 102</td>
+              <td>Support Broadcast</td>
+              <td>41</td>
+              <td><span class="table-status">Active</span></td>
+              <td><button type="button" data-row-action>View</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="inline-result" id="tableResult">2 groups loaded from dummy WhatsApp data.</div>
+      </div>
+    </section>
+
+    <section class="product-section alternate" id="messages">
+      <div class="section-copy">
+        <p class="eyebrow">Messaging</p>
+        <h2>Compose once, send with confidence.</h2>
+        <p>
+          This is the feel of Watify's send-message screen: choose recipient type, write the copy,
+          and get immediate feedback from the admin interface.
+        </p>
+      </div>
+      <div class="product-panel message-panel">
+        <div class="compose-tabs" role="tablist" aria-label="Message type">
+          <button class="active" type="button">Individual</button>
+          <button type="button">Group</button>
+          <button type="button">WhatsApp Group</button>
+        </div>
+        <label>
+          Recipient
+          <input type="text" value="+92 300 1111111" />
+        </label>
+        <label>
+          Message
+          <textarea id="messageInput">Hi team, the June campaign update is ready for review.</textarea>
+        </label>
+        <div class="send-footer">
+          <span id="messageMeta">Text message selected</span>
+          <button class="panel-button" type="button" data-demo-action="message">Send message</button>
+        </div>
+        <div class="inline-result" id="messageResult">Message is ready.</div>
+      </div>
+    </section>
+
+    <section class="analytics-band">
       <div>
-        <p class="eyebrow">Workflow</p>
-        <h2 id="workflow-title">From login to live WhatsApp action.</h2>
+        <p class="eyebrow">Analytics</p>
+        <h2>The dashboard reacts to the work.</h2>
       </div>
-      <ol class="workflow-list">
-        <li><strong>Authenticate</strong><span>Log into the admin dashboard with protected JWT routes.</span></li>
-        <li><strong>Connect</strong><span>Scan the WhatsApp Web QR code and validate the phone/session.</span></li>
-        <li><strong>Operate</strong><span>Create groups, load group lists, send messages, and manage subscribers.</span></li>
-        <li><strong>Measure</strong><span>Use dashboard analytics to inspect message and subscriber activity.</span></li>
-      </ol>
+      <div class="analytics-cards">
+        <article><span id="messagesMetric">0</span><strong>Total Messages</strong><small>Sent today</small></article>
+        <article><span id="groupsMetric">2</span><strong>Active Groups</strong><small>Loaded in table</small></article>
+        <article><span id="successMetric">0%</span><strong>Success Rate</strong><small>Dummy session</small></article>
+      </div>
     </section>
 
-    <section class="demo-section" id="demo" aria-labelledby="demo-title">
-      <div class="demo-console">
-        <p class="eyebrow">Live landing page simulation</p>
-        <h2 id="demo-title">Run the admin story in four clicks.</h2>
-        <div class="demo-actions">
-          <button type="button" data-sequence-step="connect">Connect WhatsApp</button>
-          <button type="button" data-sequence-step="group">Create Group</button>
-          <button type="button" data-sequence-step="send">Send Message</button>
-          <button type="button" data-sequence-step="track">Update Dashboard</button>
-        </div>
-        <div class="demo-output" id="demoOutput">Choose a workflow action.</div>
+    <section class="how-section" id="how">
+      <div class="section-copy">
+        <p class="eyebrow">How to use Watify</p>
+        <h2>A simple admin path from setup to execution.</h2>
       </div>
+      <ol class="how-list">
+        <li><strong>Log in</strong><span>Use the protected admin dashboard to access WhatsApp workflows.</span></li>
+        <li><strong>Connect WhatsApp</strong><span>Scan the QR code and verify the connected phone plus live session health.</span></li>
+        <li><strong>Prepare groups</strong><span>Create or list groups, review member counts, and select the audience.</span></li>
+        <li><strong>Send and track</strong><span>Compose messages, send through the connected session, and watch metrics update.</span></li>
+      </ol>
     </section>
   </main>
 
