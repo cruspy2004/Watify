@@ -147,6 +147,7 @@ button {
   border-radius: 2rem;
   background: #f5f7f4;
   box-shadow: 0 34px 90px rgba(0, 0, 0, 0.36);
+  opacity: 0.3;
   transform: perspective(1200px) rotateX(5deg) rotateY(-4deg) translateY(2rem) scale(0.96);
 }
 
@@ -378,18 +379,47 @@ h4 {
 }
 
 .problem-section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(22rem, 1.05fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
   background: #fff;
 }
 
 .problem-section p {
-  max-width: 74rem;
-  margin: 0 auto;
+  max-width: 42rem;
+  margin: 0;
   color: var(--green-900);
-  font-size: clamp(2.2rem, 5.8vw, 7rem);
+  font-size: clamp(2.1rem, 4.8vw, 6.2rem);
   font-weight: 800;
   letter-spacing: -0.06em;
   line-height: 0.9;
-  text-align: center;
+}
+
+.problem-visual {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 2rem;
+  background: var(--green-900);
+  box-shadow: var(--shadow);
+}
+
+.problem-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), transparent 42%),
+    radial-gradient(circle at 88% 84%, rgba(191, 240, 207, 0.24), transparent 12rem);
+  pointer-events: none;
+}
+
+.problem-visual img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.18;
+  object-fit: cover;
 }
 
 .eyebrow {
@@ -444,36 +474,6 @@ h4 {
   margin-bottom: clamp(3rem, 7vw, 7rem);
 }
 
-.feature-ribbon {
-  position: absolute;
-  inset: 14rem 9% auto auto;
-  z-index: 0;
-  width: 42%;
-  height: calc(100% - 18rem);
-  overflow: visible;
-  pointer-events: none;
-}
-
-#ribbonPathBase,
-#ribbonPathActive {
-  fill: none;
-  stroke-linecap: round;
-  stroke-width: 8;
-}
-
-#ribbonPathBase {
-  stroke: rgba(15, 122, 69, 0.12);
-}
-
-#ribbonPathActive {
-  stroke: var(--green-500);
-}
-
-#ribbonPoint {
-  fill: var(--green-500);
-  filter: drop-shadow(0 0 14px rgba(35, 184, 95, 0.7));
-}
-
 .feature-card {
   position: relative;
   z-index: 1;
@@ -483,6 +483,47 @@ h4 {
   align-items: center;
   width: min(100%, 64rem);
   margin-bottom: clamp(4rem, 8vw, 8rem);
+}
+
+.card-ribbon {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  width: clamp(12rem, 24vw, 22rem);
+  height: clamp(16rem, 30vw, 28rem);
+  overflow: visible;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.card-ribbon-right {
+  left: calc(100% + clamp(1.25rem, 4vw, 4.5rem));
+}
+
+.card-ribbon-left {
+  right: calc(100% + clamp(1.25rem, 4vw, 4.5rem));
+}
+
+.ribbon-base,
+.ribbon-active {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 7;
+}
+
+.ribbon-base {
+  stroke: rgba(15, 122, 69, 0.16);
+}
+
+.ribbon-active {
+  stroke: var(--green-500);
+}
+
+.ribbon-point {
+  fill: var(--green-500);
+  filter: drop-shadow(0 0 14px rgba(35, 184, 95, 0.7));
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .feature-card.left-card {
@@ -794,14 +835,22 @@ th {
     width: 100%;
   }
 
-  .feature-ribbon {
-    opacity: 0.32;
-    inset-inline: 8%;
-    width: 84%;
+  .card-ribbon {
+    position: relative;
+    inset: auto;
+    order: -1;
+    width: min(100%, 28rem);
+    height: 12rem;
+    margin: 0 auto 1rem;
+    transform: none;
   }
 
   .dashboard-underlay {
     grid-template-columns: 12rem 1fr;
+  }
+
+  .problem-section {
+    grid-template-columns: 1fr;
   }
 
   .mock-metrics,
