@@ -48,12 +48,12 @@ document.querySelectorAll('[data-demo-action]').forEach((button) => {
       phoneValue.textContent = '923126604697';
       nameValue.textContent = 'H1grow';
       healthValue.textContent = 'Operational';
-      button.textContent = 'Connection verified';
+      button.textContent = 'QR scanned';
     }
 
     if (action === 'group') {
       const name = document.querySelector('#groupNameInput').value.trim() || 'New WhatsApp Group';
-      groupResult.textContent = `${name} created with 3 participants.`;
+      groupResult.textContent = `${name} created with 5 CSV contacts.`;
       groupResult.classList.add('success');
       button.textContent = 'Group created';
     }
@@ -62,7 +62,7 @@ document.querySelectorAll('[data-demo-action]').forEach((button) => {
       const query = groupSearchInput.value.trim();
       tableResult.textContent = query
         ? `Showing groups matching "${query}".`
-        : '2 groups loaded.';
+        : '5 groups loaded.';
       tableResult.classList.add('success');
     }
 
@@ -102,10 +102,10 @@ const setupFeatureRibbon = () => {
 
   const updateRibbon = () => {
     const rect = featuresSection.getBoundingClientRect();
-    const travel = Math.max(rect.height + window.innerHeight * 0.95, 1);
-    const rawProgress = (window.innerHeight * 0.52 - rect.top) / travel;
+    const travel = Math.max(rect.height + window.innerHeight * 0.48, 1);
+    const rawProgress = (window.innerHeight * 0.58 - rect.top) / travel;
     const progress = Math.max(0, Math.min(1, rawProgress));
-    const easedProgress = Math.pow(progress, 1.28);
+    const easedProgress = Math.pow(progress, 1.14);
     const drawLength = length * easedProgress;
     const point = featureRibbonPath.getPointAtLength(drawLength);
 

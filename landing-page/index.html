@@ -81,6 +81,7 @@
         <p class="eyebrow">Product workflows</p>
         <h2 id="features-title">The WhatsApp interface your admin team actually needs.</h2>
       </div>
+      <div class="workflow-hint" role="note">Press the buttons to understand</div>
 
       <svg class="feature-ribbon" viewBox="0 0 1000 1900" preserveAspectRatio="none" aria-hidden="true">
         <defs>
@@ -113,8 +114,8 @@
       <article class="feature-card left-card" data-feature-card>
         <div class="feature-copy">
           <span>01</span>
-          <h3>Connect WhatsApp once, then work from a cleaner interface.</h3>
-          <p>See the phone identity, account name, and live status before your team sends anything.</p>
+          <h3>Scan the QR code to connect.</h3>
+          <p>Open Watify, scan once, and confirm the active WhatsApp session before your team starts working.</p>
         </div>
         <div class="interface-card whatsapp-interface">
           <div class="panel-header">
@@ -132,15 +133,15 @@
               <article><span>Live connectivity</span><strong id="healthValue">Not checked</strong></article>
             </div>
           </div>
-          <button class="panel-button" type="button" data-demo-action="connect">Run connection check</button>
+          <button class="panel-button" type="button" data-demo-action="connect">Scan QR</button>
         </div>
       </article>
 
       <article class="feature-card right-card" data-feature-card>
         <div class="feature-copy">
           <span>02</span>
-          <h3>As an admin, creating groups should not be a hassle.</h3>
-          <p>Watify turns a messy group setup into a form-based flow. Name the group, paste members, create once, and move on.</p>
+          <h3>Create a group with one tap.</h3>
+          <p>Upload a CSV, paste a list, or add numbers manually. Watify reads the contacts and builds the group without the phone chaos.</p>
         </div>
         <div class="interface-card create-group-interface">
           <div class="breadcrumb">Dashboard / WhatsApp / Create Group</div>
@@ -153,10 +154,12 @@
             Participants
             <textarea id="participantsInput">923001111111
 923002222222
-923003333333</textarea>
+923003333333
+923004444444
+923005555555</textarea>
           </label>
           <div class="form-row">
-            <span>3 valid numbers detected</span>
+            <span>5 valid numbers detected from CSV</span>
             <button class="panel-button" type="button" data-demo-action="group">Create group</button>
           </div>
           <div class="inline-result" id="groupResult">Waiting for group creation.</div>
@@ -166,50 +169,73 @@
       <article class="feature-card left-card" data-feature-card>
         <div class="feature-copy">
           <span>03</span>
-          <h3>See WhatsApp groups like an admin table, not a phone scroll.</h3>
-          <p>Search, review status, check member count, and open group details without digging through your phone.</p>
+          <h3>Cleaner view of everything going on.</h3>
+          <p>Search groups, check members, review status, and open what matters from one clean admin view.</p>
         </div>
         <div class="interface-card table-interface">
           <div class="panel-toolbar">
             <input id="groupSearchInput" type="search" placeholder="Search by group name..." />
             <button class="panel-button compact" type="button" data-demo-action="search">Search</button>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Group ID</th>
-                <th>Group</th>
-                <th>Members</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="groupTableBody">
-              <tr>
-                <td>ID# 101</td>
-                <td>June Leads</td>
-                <td>24</td>
-                <td><span class="table-status">Active</span></td>
-                <td><button type="button" data-row-action>View</button></td>
-              </tr>
-              <tr>
-                <td>ID# 102</td>
-                <td>Support Broadcast</td>
-                <td>41</td>
-                <td><span class="table-status">Active</span></td>
-                <td><button type="button" data-row-action>View</button></td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="inline-result" id="tableResult">2 groups loaded.</div>
+          <div class="group-table-scroll" aria-label="Scrollable WhatsApp group list">
+            <table>
+              <thead>
+                <tr>
+                  <th>Group ID</th>
+                  <th>Group</th>
+                  <th>Members</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="groupTableBody">
+                <tr>
+                  <td>ID# 101</td>
+                  <td>June Leads</td>
+                  <td>24</td>
+                  <td><span class="table-status">Active</span></td>
+                  <td><button type="button" data-row-action>View</button></td>
+                </tr>
+                <tr>
+                  <td>ID# 102</td>
+                  <td>Support Broadcast</td>
+                  <td>41</td>
+                  <td><span class="table-status">Active</span></td>
+                  <td><button type="button" data-row-action>View</button></td>
+                </tr>
+                <tr>
+                  <td>ID# 103</td>
+                  <td>New Customers</td>
+                  <td>58</td>
+                  <td><span class="table-status">Active</span></td>
+                  <td><button type="button" data-row-action>View</button></td>
+                </tr>
+                <tr>
+                  <td>ID# 104</td>
+                  <td>Renewal Pipeline</td>
+                  <td>32</td>
+                  <td><span class="table-status">Active</span></td>
+                  <td><button type="button" data-row-action>View</button></td>
+                </tr>
+                <tr>
+                  <td>ID# 105</td>
+                  <td>VIP Broadcast</td>
+                  <td>17</td>
+                  <td><span class="table-status">Active</span></td>
+                  <td><button type="button" data-row-action>View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="inline-result" id="tableResult">5 groups loaded.</div>
         </div>
       </article>
 
       <article class="feature-card right-card" data-feature-card>
         <div class="feature-copy">
           <span>04</span>
-          <h3>Compose once, send with confidence.</h3>
-          <p>Choose the recipient type, write the message, and send from a controlled admin interface instead of a phone chat window.</p>
+          <h3>Send messages faster.</h3>
+          <p>Pick the recipient type, write once, and send from a focused admin flow instead of repeating the same work in WhatsApp.</p>
         </div>
         <div class="interface-card message-interface">
           <div class="compose-tabs" role="tablist" aria-label="Message type">
