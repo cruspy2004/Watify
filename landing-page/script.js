@@ -102,8 +102,8 @@ const setupFeatureRibbon = () => {
 
   const updateRibbon = () => {
     const rect = featuresSection.getBoundingClientRect();
-    const travel = rect.height - window.innerHeight * 0.36;
-    const rawProgress = (window.innerHeight * 0.72 - rect.top) / travel;
+    const travel = Math.max(rect.height + window.innerHeight * 0.55, 1);
+    const rawProgress = (window.innerHeight * 0.64 - rect.top) / travel;
     const progress = Math.max(0, Math.min(1, rawProgress));
     const drawLength = length * progress;
     const point = featureRibbonPath.getPointAtLength(drawLength);
@@ -111,7 +111,7 @@ const setupFeatureRibbon = () => {
     featureRibbonPath.style.strokeDashoffset = length - drawLength;
     featureRibbonPoint.setAttribute('cx', point.x);
     featureRibbonPoint.setAttribute('cy', point.y);
-    featureRibbonPoint.style.transform = `scale(${0.75 + progress * 0.85})`;
+    featureRibbonPoint.style.transform = `scale(${0.85 + progress * 0.45})`;
   };
 
   updateRibbon();
