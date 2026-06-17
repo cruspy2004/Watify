@@ -64,18 +64,6 @@
       </div>
     </section>
 
-    <section class="problem-section" aria-label="Problem statement">
-      <div class="problem-copy">
-        <p>
-          Too dependent on WhatsApp for your business operations, but it feels redundant?
-          Why not change the interface?
-        </p>
-      </div>
-      <figure class="problem-visual">
-        <img src="assets/watify-bot-chat.png" alt="Watify assistant helping manage WhatsApp conversations" />
-      </figure>
-    </section>
-
     <section class="one-click-section" id="action" aria-labelledby="one-click-title">
       <p class="eyebrow">Watify changes the surface</p>
       <h2 id="one-click-title">Any action you want in one click.</h2>
@@ -94,12 +82,35 @@
         <h2 id="features-title">The WhatsApp interface your admin team actually needs.</h2>
       </div>
 
+      <svg class="feature-ribbon" viewBox="0 0 1000 1900" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <filter id="featureRibbonGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="10" result="blur" />
+            <feColorMatrix
+              in="blur"
+              type="matrix"
+              values="0 0 0 0 0.05 0 0 0 0 0.73 0 0 0 0 0.33 0 0 0 0.75 0"
+              result="glow"
+            />
+            <feMerge>
+              <feMergeNode in="glow" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <path
+          class="feature-ribbon-base"
+          d="M850 40 C900 215 740 300 480 345 C185 396 74 500 92 645 C116 848 540 740 690 875 C835 1005 800 1160 615 1240 C425 1322 150 1272 86 1450 C30 1612 285 1740 858 1818"
+        />
+        <path
+          id="featureRibbonPath"
+          class="feature-ribbon-active"
+          d="M850 40 C900 215 740 300 480 345 C185 396 74 500 92 645 C116 848 540 740 690 875 C835 1005 800 1160 615 1240 C425 1322 150 1272 86 1450 C30 1612 285 1740 858 1818"
+        />
+        <circle id="featureRibbonPoint" class="feature-ribbon-point" r="18" cx="850" cy="40" />
+      </svg>
+
       <article class="feature-card left-card" data-feature-card>
-        <svg class="card-ribbon card-ribbon-right" viewBox="0 0 280 360" aria-hidden="true">
-          <path class="ribbon-base" d="M38 34 C230 54 235 180 104 190 C-20 200 28 314 246 326" />
-          <path class="ribbon-active" d="M38 34 C230 54 235 180 104 190 C-20 200 28 314 246 326" />
-          <circle class="ribbon-point" r="10" cx="38" cy="34" />
-        </svg>
         <div class="feature-copy">
           <span>01</span>
           <h3>Connect WhatsApp once, then work from a cleaner interface.</h3>
@@ -126,11 +137,6 @@
       </article>
 
       <article class="feature-card right-card" data-feature-card>
-        <svg class="card-ribbon card-ribbon-left" viewBox="0 0 280 360" aria-hidden="true">
-          <path class="ribbon-base" d="M242 34 C50 54 45 180 176 190 C300 200 252 314 34 326" />
-          <path class="ribbon-active" d="M242 34 C50 54 45 180 176 190 C300 200 252 314 34 326" />
-          <circle class="ribbon-point" r="10" cx="242" cy="34" />
-        </svg>
         <div class="feature-copy">
           <span>02</span>
           <h3>As an admin, creating groups should not be a hassle.</h3>
@@ -158,11 +164,6 @@
       </article>
 
       <article class="feature-card left-card" data-feature-card>
-        <svg class="card-ribbon card-ribbon-right" viewBox="0 0 280 360" aria-hidden="true">
-          <path class="ribbon-base" d="M34 36 C210 46 260 130 134 174 C10 218 42 304 246 322" />
-          <path class="ribbon-active" d="M34 36 C210 46 260 130 134 174 C10 218 42 304 246 322" />
-          <circle class="ribbon-point" r="10" cx="34" cy="36" />
-        </svg>
         <div class="feature-copy">
           <span>03</span>
           <h3>See WhatsApp groups like an admin table, not a phone scroll.</h3>
@@ -244,6 +245,18 @@
         <li><strong>Operate</strong><span>Create groups, list groups, send messages, and manage subscribers from the dashboard.</span></li>
         <li><strong>Track</strong><span>Use analytics to confirm activity, success rate, and subscriber growth.</span></li>
       </ol>
+    </section>
+
+    <section class="problem-section" aria-label="Problem statement">
+      <div class="problem-copy">
+        <p>
+          Too dependent on WhatsApp for your business operations, but it feels redundant?
+          Why not change the interface?
+        </p>
+      </div>
+      <figure class="problem-visual">
+        <img src="assets/watify-bot-chat.png" alt="Watify assistant helping manage WhatsApp conversations" />
+      </figure>
     </section>
   </main>
 

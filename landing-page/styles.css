@@ -476,7 +476,7 @@ h4 {
 
 .feature-card {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   display: grid;
   grid-template-columns: minmax(18rem, 0.78fr) minmax(24rem, 1.22fr);
   gap: clamp(1rem, 3vw, 2.5rem);
@@ -485,43 +485,38 @@ h4 {
   margin-bottom: clamp(4rem, 8vw, 8rem);
 }
 
-.card-ribbon {
+.feature-ribbon {
   position: absolute;
   z-index: 4;
-  top: 50%;
-  width: clamp(12rem, 24vw, 22rem);
-  height: clamp(16rem, 30vw, 28rem);
+  inset: clamp(9rem, 14vw, 14rem) 0 clamp(3rem, 7vw, 7rem);
+  width: 100%;
+  height: calc(100% - clamp(12rem, 21vw, 21rem));
   overflow: visible;
   pointer-events: none;
-  transform: translateY(-50%);
 }
 
-.card-ribbon-right {
-  left: calc(100% + clamp(1.25rem, 4vw, 4.5rem));
-}
-
-.card-ribbon-left {
-  right: calc(100% + clamp(1.25rem, 4vw, 4.5rem));
-}
-
-.ribbon-base,
-.ribbon-active {
+.feature-ribbon-base,
+.feature-ribbon-active {
   fill: none;
   stroke-linecap: round;
-  stroke-width: 7;
+  stroke-linejoin: round;
 }
 
-.ribbon-base {
-  stroke: rgba(15, 122, 69, 0.16);
+.feature-ribbon-base {
+  stroke: rgba(35, 184, 95, 0.18);
+  stroke-width: 24;
+  filter: drop-shadow(0 0 18px rgba(35, 184, 95, 0.25));
 }
 
-.ribbon-active {
+.feature-ribbon-active {
   stroke: var(--green-500);
+  stroke-width: 26;
+  filter: url(#featureRibbonGlow) drop-shadow(0 0 20px rgba(35, 184, 95, 0.55));
 }
 
-.ribbon-point {
+.feature-ribbon-point {
   fill: var(--green-500);
-  filter: drop-shadow(0 0 14px rgba(35, 184, 95, 0.7));
+  filter: url(#featureRibbonGlow) drop-shadow(0 0 20px rgba(35, 184, 95, 0.85));
   transform-box: fill-box;
   transform-origin: center;
 }
@@ -835,14 +830,11 @@ th {
     width: 100%;
   }
 
-  .card-ribbon {
-    position: relative;
-    inset: auto;
-    order: -1;
-    width: min(100%, 28rem);
-    height: 12rem;
-    margin: 0 auto 1rem;
-    transform: none;
+  .feature-ribbon {
+    inset: clamp(14rem, 24vw, 20rem) -28% clamp(5rem, 12vw, 9rem);
+    width: 156%;
+    height: calc(100% - clamp(18rem, 34vw, 29rem));
+    opacity: 0.72;
   }
 
   .dashboard-underlay {

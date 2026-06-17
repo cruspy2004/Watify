@@ -1,6 +1,8 @@
 const heroStage = document.querySelector('#heroStage');
 const heroCurtain = document.querySelector('.hero-curtain');
-const ribbonSegments = Array.from(document.querySelectorAll('.card-ribbon'));
+const featuresSection = document.querySelector('.features-section');
+const featureRibbonPath = document.querySelector('#featureRibbonPath');
+const featureRibbonPoint = document.querySelector('#featureRibbonPoint');
 
 const connectionPill = document.querySelector('#connectionPill');
 const phoneValue = document.querySelector('#phoneValue');
@@ -89,39 +91,32 @@ groupSearchInput?.addEventListener('input', () => {
   });
 });
 
-const setupRibbons = () => {
-  const segments = ribbonSegments.map((segment) => {
-    const path = segment.querySelector('.ribbon-active');
-    const point = segment.querySelector('.ribbon-point');
-    const length = path.getTotalLength();
+const setupFeatureRibbon = () => {
+  if (!featuresSection || !featureRibbonPath || !featureRibbonPoint) {
+    return;
+  }
 
-    path.style.strokeDasharray = length;
-    path.style.strokeDashoffset = length;
+  const length = featureRibbonPath.getTotalLength();
+  featureRibbonPath.style.strokeDasharray = length;
+  featureRibbonPath.style.strokeDashoffset = length;
 
-    return { segment, path, point, length };
-  });
+  const updateRibbon = () => {
+    const rect = featuresSection.getBoundingClientRect();
+    const travel = rect.height - window.innerHeight * 0.36;
+    const rawProgress = (window.innerHeight * 0.72 - rect.top) / travel;
+    const progress = Math.max(0, Math.min(1, rawProgress));
+    const drawLength = length * progress;
+    const point = featureRibbonPath.getPointAtLength(drawLength);
 
-  const updateRibbons = () => {
-    segments.forEach(({ segment, path, point, length }) => {
-      const card = segment.closest('.feature-card');
-      const rect = card.getBoundingClientRect();
-      const start = window.innerHeight * 0.82;
-      const end = window.innerHeight * 0.24;
-      const rawProgress = (start - rect.top) / (start - end);
-      const progress = Math.max(0, Math.min(1, rawProgress));
-      const drawLength = length * progress;
-      const currentPoint = path.getPointAtLength(drawLength);
-
-      path.style.strokeDashoffset = length - drawLength;
-      point.setAttribute('cx', currentPoint.x);
-      point.setAttribute('cy', currentPoint.y);
-      point.style.transform = `scale(${0.8 + progress * 0.75})`;
-    });
+    featureRibbonPath.style.strokeDashoffset = length - drawLength;
+    featureRibbonPoint.setAttribute('cx', point.x);
+    featureRibbonPoint.setAttribute('cy', point.y);
+    featureRibbonPoint.style.transform = `scale(${0.75 + progress * 0.85})`;
   };
 
-  updateRibbons();
-  window.addEventListener('scroll', updateRibbons, { passive: true });
-  window.addEventListener('resize', updateRibbons);
+  updateRibbon();
+  window.addEventListener('scroll', updateRibbon, { passive: true });
+  window.addEventListener('resize', updateRibbon);
 };
 
-setupRibbons();
+setupFeatureRibbon();
