@@ -53,8 +53,8 @@ button {
   justify-content: space-between;
   gap: 1.5rem;
   padding: 1rem clamp(1rem, 4vw, 4rem);
-  background: rgba(3, 31, 21, 0.76);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(18px);
 }
 
@@ -125,7 +125,10 @@ button {
 }
 
 .header-cta {
+  border: 1px solid rgba(255, 255, 255, 0.78);
   padding: 0.72rem 1.1rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
 .hero-section {
