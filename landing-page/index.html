@@ -63,7 +63,7 @@
         <h1 id="hero-title">whatsapp for admins</h1>
       </div>
     </section>
-
+<!--
     <section class="one-click-section" id="action" aria-labelledby="one-click-title">
       <p class="eyebrow">Watify changes the surface</p>
       <h2 id="one-click-title">Any action you want in one click.</h2>
@@ -74,12 +74,12 @@
         <button type="button" data-quick-action="track">Track Result</button>
       </div>
       <output id="quickActionOutput">Choose an action to see Watify respond.</output>
-    </section>
+    </section> -->
 
     <section class="features-section" id="features" aria-labelledby="features-title">
       <div class="features-heading">
         <p class="eyebrow">Product workflows</p>
-        <h2 id="features-title">The WhatsApp interface your admin team actually needs.</h2>
+        <h2 id="features-title">One click for your daily whatsapp actions.</h2>
       </div>
       <div class="workflow-hint" role="note">Press the buttons to understand</div>
 
@@ -126,6 +126,13 @@
             <div class="qr-box">
               <img src="assets/watify-qr.svg" alt="Watify QR code" />
               <small>Scan to connect</small>
+            </div>
+            <div class="phone-scan" id="phoneScanMock" aria-live="polite">
+              <div class="phone-top"></div>
+              <div class="phone-screen">
+                <span id="phoneScanStatus">Scan to connect</span>
+              </div>
+              <div class="phone-home"></div>
             </div>
             <div class="connection-cards">
               <article><span>Connected number</span><strong id="phoneValue">Unavailable</strong></article>
@@ -228,6 +235,15 @@
             </table>
           </div>
           <div class="inline-result" id="tableResult">5 groups loaded.</div>
+          <div class="lead-panel" id="leadPanel" aria-live="polite">
+            <div class="lead-panel-header">
+              <strong>Select a group</strong>
+              <span>Press View to show leads</span>
+            </div>
+            <ul id="leadList">
+              <li>No leads selected yet.</li>
+            </ul>
+          </div>
         </div>
       </article>
 
@@ -245,7 +261,7 @@
           </div>
           <label>
             Recipient
-            <input type="text" value="+92 300 1111111" />
+            <input type="text" value="+92 300 1111111, +923258660707" />
           </label>
           <label>
             Message

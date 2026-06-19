@@ -8,12 +8,16 @@ const connectionPill = document.querySelector('#connectionPill');
 const phoneValue = document.querySelector('#phoneValue');
 const nameValue = document.querySelector('#nameValue');
 const healthValue = document.querySelector('#healthValue');
+const phoneScanMock = document.querySelector('#phoneScanMock');
+const phoneScanStatus = document.querySelector('#phoneScanStatus');
 
 const groupResult = document.querySelector('#groupResult');
 const tableResult = document.querySelector('#tableResult');
 const messageResult = document.querySelector('#messageResult');
 const groupTableBody = document.querySelector('#groupTableBody');
 const groupSearchInput = document.querySelector('#groupSearchInput');
+const leadPanel = document.querySelector('#leadPanel');
+const leadList = document.querySelector('#leadList');
 const quickActionOutput = document.querySelector('#quickActionOutput');
 
 const quickMessages = {
@@ -21,6 +25,34 @@ const quickMessages = {
   group: 'Group created. Members are ready for review.',
   send: 'Message sent. The result is tracked in the dashboard.',
   track: 'Metrics updated. Admin work is now visible.'
+};
+
+const groupLeads = {
+  'June Leads': [
+    'Ayesha Khan - +92 300 1111111',
+    'Bilal Ahmed - +92 301 2222222',
+    'Minaal Raza - +92 302 3333333'
+  ],
+  'Support Broadcast': [
+    'Noman Ali - +92 310 4444444',
+    'Sara Malik - +92 311 5555555',
+    'Usman Tariq - +92 312 6666666'
+  ],
+  'New Customers': [
+    'Hira Sheikh - +92 320 7777777',
+    'Danish Iqbal - +92 321 8888888',
+    'Zain Fatima - +92 322 9999999'
+  ],
+  'Renewal Pipeline': [
+    'Sameer Shah - +92 330 1010101',
+    'Iqra Noor - +92 331 2020202',
+    'Hamza Qureshi - +92 332 3030303'
+  ],
+  'VIP Broadcast': [
+    'Wateen Admin - +92 340 4040404',
+    'Priority Lead - +92 341 5050505',
+    'Enterprise Contact - +92 342 6060606'
+  ]
 };
 
 heroStage?.addEventListener('mousemove', (event) => {
@@ -48,6 +80,10 @@ document.querySelectorAll('[data-demo-action]').forEach((button) => {
       phoneValue.textContent = '923126604697';
       nameValue.textContent = 'H1grow';
       healthValue.textContent = 'Operational';
+      phoneScanMock?.classList.add('connected');
+      if (phoneScanStatus) {
+        phoneScanStatus.textContent = 'Connected';
+      }
       button.textContent = 'QR scanned';
     }
 
@@ -78,7 +114,21 @@ document.querySelectorAll('[data-row-action]').forEach((button) => {
   button.addEventListener('click', () => {
     const row = button.closest('tr');
     const groupName = row.children[1].textContent;
-    tableResult.textContent = `Opened details for ${groupName}.`;
+    const leads = groupLeads[groupName] || ['No leads available for this group.'];
+
+    if (leadPanel && leadList) {
+      leadPanel.querySelector('strong').textContent = `${groupName} leads`;
+      leadPanel.querySelector('span').textContent = `${leads.length} visible leads`;
+      leadList.replaceChildren(
+        ...leads.map((lead) => {
+          const item = document.createElement('li');
+          item.textContent = lead;
+          return item;
+        })
+      );
+    }
+
+    tableResult.textContent = `Showing leads for ${groupName}.`;
     tableResult.classList.add('success');
   });
 });

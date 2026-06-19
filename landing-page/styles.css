@@ -55,11 +55,8 @@ button {
   justify-content: space-between;
   gap: 1.5rem;
   margin-top: 1rem;
-  padding: 0.85rem 1.05rem;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(18px);
+  padding: 0.85rem 0;
+  background: transparent;
 }
 
 .brand,
@@ -129,10 +126,10 @@ button {
 }
 
 .header-cta {
-  border: 1px solid rgba(255, 255, 255, 0.78);
   padding: 0.72rem 1.1rem;
-  background: rgba(255, 255, 255, 0.08);
+  background: transparent;
   color: #fff;
+  box-shadow: none;
 }
 
 .hero-section {
@@ -624,7 +621,7 @@ h4 {
 
 .qr-layout {
   display: grid;
-  grid-template-columns: 13rem 1fr;
+  grid-template-columns: 12rem 8rem 1fr;
   gap: 1rem;
 }
 
@@ -653,6 +650,58 @@ h4 {
 .qr-box small {
   margin-top: 0.5rem;
   color: var(--muted);
+}
+
+.phone-scan {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 14.5rem;
+  padding: 0.55rem;
+  border: 1px solid rgba(15, 122, 69, 0.18);
+  border-radius: 1.4rem;
+  background: linear-gradient(180deg, #10291d, #061f15);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 1rem 2rem rgba(4, 45, 28, 0.14);
+}
+
+.phone-top,
+.phone-home {
+  justify-self: center;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.phone-top {
+  width: 2.2rem;
+  height: 0.28rem;
+  margin: 0.35rem 0 0.5rem;
+  border-radius: 999px;
+}
+
+.phone-home {
+  width: 1.45rem;
+  height: 1.45rem;
+  margin-top: 0.55rem;
+  border-radius: 50%;
+}
+
+.phone-screen {
+  display: grid;
+  place-items: center;
+  padding: 0.9rem;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(191, 240, 207, 0.34), transparent 4.5rem),
+    linear-gradient(180deg, var(--green-800), var(--green-950));
+  color: #fff;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.phone-scan.connected .phone-screen {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.32), transparent 4.5rem),
+    linear-gradient(180deg, var(--green-500), var(--green-800));
 }
 
 .connection-cards {
@@ -777,6 +826,46 @@ table {
   position: sticky;
   top: 0;
   z-index: 1;
+}
+
+.lead-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(15, 122, 69, 0.13);
+  border-radius: 1rem;
+  background: #f8fbf8;
+}
+
+.lead-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.lead-panel-header strong {
+  color: var(--green-900);
+}
+
+.lead-panel-header span,
+.lead-panel li {
+  color: var(--muted);
+}
+
+.lead-panel ul {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lead-panel li {
+  padding: 0.62rem 0.75rem;
+  border-radius: 0.7rem;
+  background: #fff;
+  font-weight: 800;
 }
 
 th,
@@ -913,6 +1002,14 @@ th {
   .connection-cards {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .qr-layout {
+    grid-template-columns: 12rem 8rem;
+  }
+
+  .connection-cards {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 760px) {
@@ -927,6 +1024,14 @@ th {
 
   .nav-links {
     flex-wrap: wrap;
+  }
+
+  .qr-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .phone-scan {
+    min-height: 12rem;
   }
 
   .hero-section {
