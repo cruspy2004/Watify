@@ -45,16 +45,20 @@ button {
 }
 
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: clamp(1rem, 4vw, 4rem);
+  right: clamp(1rem, 4vw, 4rem);
   z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  padding: 1rem clamp(1rem, 4vw, 4rem);
-  background: transparent;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.72);
+  margin-top: 1rem;
+  padding: 0.85rem 1.05rem;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(18px);
 }
 
@@ -97,7 +101,7 @@ button {
 
 .nav-links a,
 .header-cta {
-  color: rgba(255, 255, 255, 0.86);
+  color: #fff;
   text-decoration: none;
   font-weight: 800;
 }
@@ -134,6 +138,7 @@ button {
 .hero-section {
   position: relative;
   min-height: calc(100vh - 4.7rem);
+  padding-top: 4.7rem;
   overflow: hidden;
   background:
     radial-gradient(circle at 70% 12%, rgba(191, 240, 207, 0.34), transparent 22rem),
@@ -912,8 +917,12 @@ th {
 
 @media (max-width: 760px) {
   .site-header {
-    align-items: flex-start;
-    flex-direction: column;
+    left: 0.75rem;
+    right: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    border-radius: 1.2rem;
   }
 
   .nav-links {
