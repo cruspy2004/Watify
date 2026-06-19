@@ -127,7 +127,7 @@
               <img src="assets/watify-qr.svg" alt="Watify QR code" />
               <small>Scan to connect</small>
             </div>
-            <div class="phone-scan" id="phoneScanMock" aria-live="polite">
+            <div class="phone-scan" id="phoneScanMock" role="button" tabindex="0" aria-label="Click to simulate QR scan" title="Click to connect" aria-live="polite">
               <div class="phone-top"></div>
               <div class="phone-screen">
                 <span id="phoneScanStatus">Scan to connect</span>
@@ -137,7 +137,6 @@
             <div class="connection-cards">
               <article><span>Connected number</span><strong id="phoneValue">Unavailable</strong></article>
               <article><span>Account name</span><strong id="nameValue">Unavailable</strong></article>
-              <article><span>Live connectivity</span><strong id="healthValue">Not checked</strong></article>
             </div>
           </div>
           <button class="panel-button" type="button" data-demo-action="connect">Scan QR</button>

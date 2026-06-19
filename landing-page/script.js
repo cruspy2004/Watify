@@ -75,16 +75,7 @@ document.querySelectorAll('[data-demo-action]').forEach((button) => {
     const action = button.dataset.demoAction;
 
     if (action === 'connect') {
-      connectionPill.textContent = 'Connected';
-      connectionPill.classList.add('connected');
-      phoneValue.textContent = '923126604697';
-      nameValue.textContent = 'H1grow';
-      healthValue.textContent = 'Operational';
-      phoneScanMock?.classList.add('connected');
-      if (phoneScanStatus) {
-        phoneScanStatus.textContent = 'Connected';
-      }
-      button.textContent = 'QR scanned';
+      triggerConnect();
     }
 
     if (action === 'group') {
@@ -108,6 +99,30 @@ document.querySelectorAll('[data-demo-action]').forEach((button) => {
       button.textContent = 'Message sent';
     }
   });
+});
+
+// Clicking the phone mock also triggers connect
+function triggerConnect() {
+  if (connectionPill) {
+    connectionPill.textContent = 'Connected';
+    connectionPill.classList.add('connected');
+  }
+  if (phoneValue) phoneValue.textContent = '923126604697';
+  if (nameValue) nameValue.textContent = 'H1grow';
+  const healthValue = document.querySelector('#healthValue');
+  if (healthValue) healthValue.textContent = 'Operational';
+  phoneScanMock?.classList.add('connected');
+  if (phoneScanStatus) phoneScanStatus.textContent = 'Connected';
+  const scanBtn = document.querySelector('[data-demo-action="connect"]');
+  if (scanBtn) scanBtn.textContent = 'QR scanned';
+}
+
+phoneScanMock?.addEventListener('click', triggerConnect);
+phoneScanMock?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    triggerConnect();
+  }
 });
 
 document.querySelectorAll('[data-row-action]').forEach((button) => {
