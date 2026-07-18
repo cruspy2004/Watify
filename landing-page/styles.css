@@ -1,5 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&display=swap");
 
+::selection {
+  background: var(--green-200);
+  color: var(--green-950);
+}
+
 :root {
   --green-950: #031f15;
   --green-900: #063d27;
@@ -45,7 +50,7 @@ button {
 }
 
 .site-header {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: clamp(1rem, 4vw, 4rem);
   right: clamp(1rem, 4vw, 4rem);
@@ -79,6 +84,12 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 900;
+}
+
+.brand-logo {
+  height: 2.2rem;
+  width: auto;
+  display: block;
 }
 
 .brand-mark {
@@ -183,7 +194,6 @@ button {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, transparent 0 48%, rgba(255, 255, 255, 0.34) 49.7%, rgba(191, 240, 207, 0.06) 51%, transparent 54%),
     radial-gradient(circle at 52% 55%, rgba(191, 240, 207, 0.14), transparent 18rem);
   mix-blend-mode: screen;
 }
@@ -376,57 +386,64 @@ h4 {
   font-weight: 900;
 }
 
-.problem-section,
-.one-click-section,
 .features-section,
 .how-section {
   padding: clamp(4rem, 8vw, 8rem) clamp(1rem, 6vw, 6rem);
 }
 
-.problem-section {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(22rem, 1.05fr);
-  gap: clamp(2rem, 5vw, 5rem);
+.cta-section {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 100vh;
+  padding: clamp(6rem, 10vw, 10rem) clamp(1.5rem, 6vw, 6rem);
   background:
-    radial-gradient(circle at 70% 35%, rgba(35, 184, 95, 0.32), transparent 26rem),
-    linear-gradient(135deg, var(--green-950), var(--green-800));
+    radial-gradient(circle at 50% 50%, rgba(35, 184, 95, 0.25), transparent 30rem),
+    linear-gradient(135deg, var(--green-950), var(--green-900));
 }
 
-.problem-section p {
-  max-width: 42rem;
-  margin: 0;
-  color: #f5fff8;
-  font-size: clamp(2.1rem, 4.8vw, 6.2rem);
+.cta-content {
+  max-width: 56rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.cta-content h2 {
+  color: #ffffff;
+  font-size: clamp(2.2rem, 5vw, 4.8rem);
   font-weight: 800;
-  letter-spacing: -0.06em;
-  line-height: 0.9;
-}
-
-.problem-visual {
-  position: relative;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
   margin: 0;
-  overflow: hidden;
-  border-radius: 2rem;
-  background: transparent;
-  box-shadow: 0 2rem 5rem rgba(0, 28, 15, 0.26);
 }
 
-.problem-visual::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.1), transparent 42%),
-    radial-gradient(circle at 88% 84%, rgba(191, 240, 207, 0.2), transparent 12rem);
-  pointer-events: none;
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.1rem 2.4rem;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--green-950);
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 20px 45px rgba(3, 31, 21, 0.4);
+  transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
 }
 
-.problem-visual img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 1.18;
-  object-fit: cover;
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 50px rgba(3, 31, 21, 0.5), 0 0 0 4px rgba(255, 255, 255, 0.2);
+  background: var(--mint);
+}
+
+.cta-button:active {
+  transform: translateY(-1px);
 }
 
 .eyebrow {
@@ -438,48 +455,9 @@ h4 {
   text-transform: uppercase;
 }
 
-.one-click-section {
-  color: var(--green-900);
-  background:
-    radial-gradient(circle at 80% 15%, rgba(35, 184, 95, 0.12), transparent 22rem),
-    #fff;
-  border-bottom: 1px solid var(--line);
-}
-
-.one-click-section h2 {
-  max-width: 12ch;
-}
-
-.one-click-console {
-  gap: 0.8rem;
-  flex-wrap: wrap;
-  margin-top: 2rem;
-}
-
-.one-click-console button {
-  min-height: 3rem;
-  padding: 0 1.1rem;
-  border: 1px solid rgba(15, 122, 69, 0.18);
-  background: linear-gradient(180deg, var(--green-500), var(--green-800));
-  color: #fff;
-  box-shadow: 0 0.85rem 2rem rgba(12, 78, 45, 0.22);
-}
-
-.one-click-console button:active,
 .panel-button:active,
 .table-interface button:active {
   transform: translateY(1px) scale(0.98);
-}
-
-#quickActionOutput {
-  display: block;
-  width: min(100%, 44rem);
-  margin-top: 1rem;
-  padding: 1rem;
-  border: 1px solid rgba(15, 122, 69, 0.12);
-  border-radius: 1rem;
-  background: rgba(35, 184, 95, 0.08);
-  color: var(--green-800);
 }
 
 .features-section {
@@ -1000,10 +978,6 @@ th {
 
   .dashboard-underlay {
     grid-template-columns: 12rem 1fr;
-  }
-
-  .problem-section {
-    grid-template-columns: 1fr;
   }
 
   .mock-metrics,
