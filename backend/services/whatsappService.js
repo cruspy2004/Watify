@@ -1,4 +1,8 @@
-const { client, getClientHealth, restartClient } = require('../config/whatsapp');
+// Read the live client through the module (`whatsapp.client`) rather than
+// destructuring it — the instance is replaced on every restart and a captured
+// reference would point at a destroyed session forever.
+const whatsapp = require('../config/whatsapp');
+const { getClientHealth, restartClient, bus } = require('../config/whatsapp');
 const QRCode = require('qrcode');
 
 class WhatsAppService {
@@ -11,62 +15,62 @@ class WhatsAppService {
 
     setupEventListeners() {
         // Use the enhanced event handlers from the client config
-        client.on('qr_ready', (qr) => {
+        bus.on('qr_ready', (qr) => {
             console.log('📱 QR Code ready in service');
             this.qrCodeData = qr;
             this.isReady = false;
             this.connectionState = 'QR_READY';
         });
 
-        client.on('client_ready', (info) => {
+        bus.on('client_ready', (info) => {
             console.log('✅ Client ready in service');
             this.isReady = true;
             this.qrCodeData = null;
             this.connectionState = 'CONNECTED';
         });
 
-        client.on('client_authenticated', () => {
+        bus.on('client_authenticated', () => {
             console.log('🔐 Client authenticated in service');
             this.connectionState = 'AUTHENTICATED';
         });
 
-        client.on('auth_failed', (msg) => {
+        bus.on('auth_failed', (msg) => {
             console.error(' Authentication failed in service:', msg);
             this.isReady = false;
             this.connectionState = 'AUTH_FAILED';
         });
 
-        client.on('client_disconnected', (reason) => {
+        bus.on('client_disconnected', (reason) => {
             console.log(' Client disconnected in service:', reason);
             this.isReady = false;
             this.connectionState = 'DISCONNECTED';
         });
 
-        client.on('state_changed', (state) => {
+        bus.on('state_changed', (state) => {
             console.log(' State changed in service:', state);
             this.connectionState = state;
         });
 
-        client.on('client_error', (error) => {
+        bus.on('client_error', (error) => {
             console.error(' Client error in service:', error);
             this.connectionState = 'ERROR';
         });
 
         // Handle incoming messages
-        client.on('incoming_message', async (message) => {
+        bus.on('incoming_message', async (message) => {
             await this.handleIncomingMessage(message);
         });
 
-        client.on('message_received', async (data) => {
+        bus.on('message_received', async (data) => {
             await this.handleMessageReceived(data);
         });
 
         // Handle group events
-        client.on('group_member_added', (notification) => {
+        bus.on('group_member_added', (notification) => {
             this.handleGroupMemberAdded(notification);
         });
 
-        client.on('group_member_removed', (notification) => {
+        bus.on('group_member_removed', (notification) => {
             this.handleGroupMemberRemoved(notification);
         });
     }
@@ -233,7 +237,7 @@ class WhatsAppService {
             
             // Check client state more thoroughly
             try {
-                const clientState = await client.getState();
+                const clientState = await whatsapp.client.getState();
                 console.log(` [DEBUG] Client state: ${clientState}`);
             } catch (stateError) {
                 console.log(` [DEBUG] Could not get client state: ${stateError.message}`);
@@ -257,7 +261,7 @@ class WhatsAppService {
             // Check if the number is registered on WhatsApp first
             console.log(` [DEBUG] Checking if number is registered...`);
             try {
-                const isRegistered = await client.isRegisteredUser(chatId);
+                const isRegistered = await whatsapp.client.isRegisteredUser(chatId);
                 console.log(` [DEBUG] Number registration status: ${isRegistered}`);
                 
                 if (!isRegistered) {
@@ -274,7 +278,7 @@ class WhatsAppService {
             console.log(` [DEBUG] Message content: "${message}"`);
             
             try {
-                const response = await client.sendMessage(chatId, message, options);
+                const response = await whatsapp.client.sendMessage(chatId, message, options);
                 console.log(` [DEBUG] Send response received:`, {
                     hasResponse: !!response,
                     hasId: !!(response && response.id),
@@ -315,7 +319,7 @@ class WhatsAppService {
                 console.log(` [DEBUG] Alternative Chat ID: ${altChatId}`);
                 
                 try {
-                    const altResponse = await client.sendMessage(altChatId, message, options);
+                    const altResponse = await whatsapp.client.sendMessage(altChatId, message, options);
                     console.log(` [DEBUG] Alternative send response:`, {
                         hasResponse: !!altResponse,
                         hasId: !!(altResponse && altResponse.id),
@@ -361,12 +365,12 @@ class WhatsAppService {
             const chatId = `${sanitizedNumber}@c.us`;
             
             // Check if the number is registered
-            const isRegistered = await client.isRegisteredUser(chatId);
+            const isRegistered = await whatsapp.client.isRegisteredUser(chatId);
             if (!isRegistered) {
                 throw new Error(`Number ${number} is not registered on WhatsApp`);
             }
 
-            const response = await client.sendMessage(chatId, media, { caption });
+            const response = await whatsapp.client.sendMessage(chatId, media, { caption });
             
             console.log(` Media message sent to ${number}`);
             
@@ -472,7 +476,7 @@ class WhatsAppService {
 
             const sanitizedNumber = number.replace(/[^\d]/g, '');
             const chatId = `${sanitizedNumber}@c.us`;
-            const isRegistered = await client.isRegisteredUser(chatId);
+            const isRegistered = await whatsapp.client.isRegisteredUser(chatId);
             
             return {
                 number,
@@ -492,7 +496,7 @@ class WhatsAppService {
                 throw new Error('WhatsApp client is not ready. Please authenticate first.');
             }
 
-            const chats = await client.getChats();
+            const chats = await whatsapp.client.getChats();
             return chats.map(chat => {
                 // Debug logging to see what we get
                 if (chat.isGroup) {
@@ -527,7 +531,7 @@ class WhatsAppService {
                 throw new Error('WhatsApp client is not ready. Please authenticate first.');
             }
 
-            const chat = await client.getChatById(groupId);
+            const chat = await whatsapp.client.getChatById(groupId);
             
             if (!chat.isGroup) {
                 throw new Error('Chat ID is not a group');
@@ -574,13 +578,13 @@ class WhatsAppService {
             console.log(`📇 Adding contact: ${name || sanitizedNumber}`);
 
             // Check if contact is already registered on WhatsApp
-            const isRegistered = await client.isRegisteredUser(contactId);
+            const isRegistered = await whatsapp.client.isRegisteredUser(contactId);
             if (!isRegistered) {
                 throw new Error(`Number ${phoneNumber} is not registered on WhatsApp`);
             }
 
             // Get or create contact
-            const contact = await client.getContactById(contactId);
+            const contact = await whatsapp.client.getContactById(contactId);
             
             // If name is provided, try to update the contact name
             if (name && name.trim()) {
@@ -702,7 +706,7 @@ class WhatsAppService {
             // Wait a bit before group creation to ensure stability
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            const group = await client.createGroup(groupName.trim(), processedParticipants);
+            const group = await whatsapp.client.createGroup(groupName.trim(), processedParticipants);
 
             console.log(`🔍 Debug - Group creation response:`, {
                 hasGroup: !!group,
@@ -799,7 +803,7 @@ class WhatsAppService {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Create the group
-            const group = await client.createGroup(groupName.trim(), participantChatIds);
+            const group = await whatsapp.client.createGroup(groupName.trim(), participantChatIds);
 
             console.log(`🔍 Debug - Group creation response:`, {
                 hasGroup: !!group,
@@ -878,7 +882,7 @@ class WhatsAppService {
             console.log(`👥 Adding ${participantChatIds.length} participants to group ${groupId}`);
 
             // Get the group chat
-            const chat = await client.getChatById(groupId);
+            const chat = await whatsapp.client.getChatById(groupId);
             
             if (!chat.isGroup) {
                 throw new Error('Chat ID is not a group');
@@ -929,7 +933,7 @@ class WhatsAppService {
             console.log(`👥 Removing ${participantChatIds.length} participants from group ${groupId}`);
 
             // Get the group chat
-            const chat = await client.getChatById(groupId);
+            const chat = await whatsapp.client.getChatById(groupId);
             
             if (!chat.isGroup) {
                 throw new Error('Chat ID is not a group');
@@ -962,7 +966,7 @@ class WhatsAppService {
                 throw new Error('WhatsApp client is not ready. Please authenticate first.');
             }
 
-            const response = await client.sendMessage(groupId, message);
+            const response = await whatsapp.client.sendMessage(groupId, message);
             
             console.log(`📨 Message sent to group ${groupId}`);
             
@@ -988,7 +992,7 @@ class WhatsAppService {
                 throw new Error('WhatsApp client is not ready. Please authenticate first.');
             }
 
-            const chat = await client.getChatById(groupId);
+            const chat = await whatsapp.client.getChatById(groupId);
             
             if (!chat.isGroup) {
                 throw new Error('Chat ID is not a group');
@@ -1072,7 +1076,7 @@ class WhatsAppService {
             }
             
             const health = getClientHealth();
-            const info = client.info;
+            const info = whatsapp.client.info;
             
             return {
                 ...info,
@@ -1111,7 +1115,7 @@ class WhatsAppService {
             if (health.isReady && !health.sessionClosed) {
                 try {
                     // Try to get state as a simple connectivity test
-                    const state = await client.getState();
+                    const state = await whatsapp.client.getState();
                     connectivityTest = state === 'CONNECTED' ? 'pass' : 'warning';
                 } catch (error) {
                     connectivityTest = error.message.includes('Session closed') ? 'session_closed' : 'fail';

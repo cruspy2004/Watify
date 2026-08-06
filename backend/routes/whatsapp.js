@@ -13,7 +13,12 @@ const buildConnectionStatus = async () => {
   const clientInfo = state.clientInfo || healthCheck?.health?.clientInfo || healthCheck?.stats?.clientInfo || null;
   const connectedPhone = getPhoneFromClientInfo(clientInfo);
   const connectivity = healthCheck?.connectivity || 'unknown';
-  const isOperational = Boolean(state.isReady && !state.sessionClosed && connectivity === 'pass');
+  // `connectivity` comes from a live `client.getState()` round-trip, which
+  // routinely answers 'OPENING'/null/throws while the page settles even though
+  // the session is perfectly usable. Treat it as advisory telemetry — the
+  // authoritative readiness signal is the client's own ready/disconnected
+  // lifecycle. Gating requests on it produced spurious 503s.
+  const isOperational = Boolean(state.isReady && !state.sessionClosed);
 
   return {
     ...state,
@@ -31,8 +36,17 @@ const buildConnectionStatus = async () => {
   };
 };
 
-// Add a public debug endpoint for testing WhatsApp status
-router.get('/debug/status', async (req, res) => {
+// Debug endpoints. These expose the pairing QR and can restart the client, so
+// they are authenticated and disabled outside development — they were public.
+const debugOnly = (req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ message: 'Route not found' });
+  }
+  return next();
+};
+
+// Debug endpoint for testing WhatsApp status
+router.get('/debug/status', debugOnly, authenticateToken, async (req, res) => {
   try {
     const state = whatsappService.getState();
     const health = whatsappService.getServiceStats();
@@ -55,8 +69,8 @@ router.get('/debug/status', async (req, res) => {
   }
 });
 
-// Add a public debug endpoint for QR code
-router.get('/debug/qr', async (req, res) => {
+// Debug endpoint for QR code
+router.get('/debug/qr', debugOnly, authenticateToken, async (req, res) => {
   try {
     const qrData = await whatsappService.getQRCode();
     if (qrData) {
@@ -81,8 +95,8 @@ router.get('/debug/qr', async (req, res) => {
   }
 });
 
-// Add a public debug restart endpoint
-router.post('/debug/restart', async (req, res) => {
+// Debug restart endpoint
+router.post('/debug/restart', debugOnly, authenticateToken, async (req, res) => {
   try {
     console.log('🔄 Debug restart requested...');
     await whatsappService.restart();
@@ -164,28 +178,46 @@ router.get('/groups', authenticateToken, async (req, res) => {
     }
 
     console.log('📋 Fetching WhatsApp groups directly from client...');
-    
+
+    const myId = state.connectedAccount;
+
     // Get chats directly from whatsapp service without transformation issues
     const allChats = await whatsappService.executeWithRetry(async () => {
-      const { client } = require('../config/whatsapp');
-      const chats = await client.getChats();
-      
+      const whatsapp = require('../config/whatsapp');
+      const chats = await whatsapp.client.getChats();
+
       console.log(`📊 Raw chats found: ${chats.length}`);
-      
+
       return chats.filter(chat => chat.isGroup).map(chat => {
         const groupId = chat.id && chat.id._serialized ? chat.id._serialized : null;
         console.log(`📋 Group: ${chat.name} - ID: ${groupId}`);
-        
+
+        const participants = chat.participants || [];
+        const me = myId
+          ? participants.find(p => p.id && p.id._serialized === myId)
+          : null;
+
         return {
           id: groupId,
           name: chat.name || 'Unnamed Group',
           description: chat.description || '',
-          participantCount: chat.participants ? chat.participants.length : 0,
+          participantCount: participants.length,
+          participants: participants.map(p => ({
+            id: p.id ? p.id._serialized : null,
+            isAdmin: !!p.isAdmin,
+            isSuperAdmin: !!p.isSuperAdmin
+          })),
           isGroup: true,
+          isAdmin: !!(me && (me.isAdmin || me.isSuperAdmin)),
+          archived: !!chat.archived,
+          pinned: !!chat.pinned,
+          muted: !!chat.isMuted,
+          unreadCount: chat.unreadCount || 0,
+          createdAt: chat.createdAt ? new Date(chat.createdAt * 1000) : null,
           timestamp: chat.timestamp ? new Date(chat.timestamp * 1000) : null,
           lastMessage: chat.lastMessage ? {
             body: chat.lastMessage.body || '',
-            timestamp: chat.lastMessage.timestamp ? new Date(chat.lastMessage.timestamp * 1000) : null
+            timestamp: chat.lastMessage.timestamp || null
           } : null
         };
       }).filter(group => group.id !== null); // Only return groups with valid IDs
@@ -193,12 +225,31 @@ router.get('/groups', authenticateToken, async (req, res) => {
 
     console.log(`📊 Valid groups found: ${allChats.length}`);
 
+    const adminGroups = allChats.filter(g => g.isAdmin).length;
+
     res.json({
       status: 'success',
       message: 'WhatsApp groups retrieved successfully',
       data: {
         groups: allChats,
         totalGroups: allChats.length,
+        statistics: {
+          totalGroups: allChats.length,
+          adminGroups,
+          memberGroups: allChats.length - adminGroups,
+          totalParticipants: allChats.reduce((sum, g) => sum + g.participantCount, 0),
+          unreadGroups: allChats.filter(g => g.unreadCount > 0).length,
+          archivedGroups: allChats.filter(g => g.archived).length
+        },
+        whatsappInfo: {
+          isReady: state.isReady,
+          isAuthenticated: state.isAuthenticated,
+          connectedNumber: state.connectedPhone,
+          pushname: state.connectedName,
+          platform: state.platform,
+          connectionStatus: state.state,
+          connectivity: state.connectivity
+        },
         connection: {
           connectedPhone: state.connectedPhone,
           connectedName: state.connectedName,
@@ -640,96 +691,11 @@ router.get('/chats', authenticateToken, async (req, res) => {
   }
 });
 
-// Get WhatsApp groups only (filtered from chats)
-router.get('/groups', authenticateToken, async (req, res) => {
-  try {
-    // Check if WhatsApp is ready
-    const state = whatsappService.getState();
-    if (!state.isReady) {
-      return res.status(503).json({
-        status: 'error',
-        message: 'WhatsApp client is not ready. Please authenticate first.',
-        data: { state: state.state, hasQR: state.hasQR }
-      });
-    }
-
-    const chats = await whatsappService.getChats();
-    // Filter only groups
-    const groups = chats.filter(chat => chat.isGroup);
-    const individuals = chats.filter(chat => !chat.isGroup);
-    
-    // Get client info
-    const clientInfo = state.clientInfo || {};
-    
-    // Prepare statistics
-    const statistics = {
-      totalGroups: groups.length,
-      totalIndividualChats: individuals.length,
-      totalChats: chats.length,
-      unreadGroups: groups.filter(g => g.unreadCount > 0).length,
-      activeGroups: groups.filter(g => g.timestamp > 0).length
-    };
-    
-    // Prepare WhatsApp info
-    const whatsappInfo = {
-      isReady: state.isReady,
-      isAuthenticated: state.isAuthenticated,
-      user: {
-        name: clientInfo.pushname || 'Unknown',
-        phone: clientInfo.wid?.user || 'Unknown',
-        platform: clientInfo.platform || 'Unknown'
-      },
-      connectionStatus: state.state || 'unknown'
-    };
-    
-    res.json({
-      status: 'success',
-      message: 'WhatsApp groups fetched successfully',
-      data: {
-        groups: groups,
-        statistics: statistics,
-        whatsappInfo: whatsappInfo
-      }
-    });
-  } catch (error) {
-    console.error('Error getting WhatsApp groups:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to get WhatsApp groups',
-      error: error.message
-    });
-  }
-});
-
-// Get detailed group information including participants
-router.get('/groups/:groupId/info', authenticateToken, async (req, res) => {
-  try {
-    const { groupId } = req.params;
-    
-    const state = whatsappService.getState();
-    if (!state.isReady) {
-      return res.status(503).json({
-        status: 'error',
-        message: 'WhatsApp client is not ready. Please authenticate first.'
-      });
-    }
-
-    const groupInfo = await whatsappService.getGroupInfo(groupId);
-    
-    res.json({
-      status: 'success',
-      message: 'Group information retrieved successfully',
-      data: groupInfo
-    });
-  } catch (error) {
-    console.error('Error getting group info:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to get group information',
-      error: error.message
-    });
-  }
-});
+// NOTE: duplicate `GET /groups` and `GET /groups/:groupId/info` handlers used to
+// live here. Express only ever matched the earlier definitions, so these were
+// dead code — and the frontend was written against *their* response shape,
+// which is why the statistics and account panels rendered empty. The surviving
+// handlers above now return that shape.
 
 // Create a new WhatsApp group
 router.post('/groups/create', authenticateToken, async (req, res) => {
@@ -931,43 +897,8 @@ router.delete('/groups/:groupId/participants/remove', authenticateToken, async (
   }
 });
 
-// Send message to a WhatsApp group
-router.post('/groups/:groupId/send-message', authenticateToken, async (req, res) => {
-  try {
-    const { groupId } = req.params;
-    const { message } = req.body;
-    
-    if (!message) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Message is required'
-      });
-    }
-
-    const state = whatsappService.getState();
-    if (!state.isReady) {
-      return res.status(503).json({
-        status: 'error',
-        message: 'WhatsApp client is not ready. Please authenticate first.'
-      });
-    }
-
-    const result = await whatsappService.sendGroupMessage(groupId, message);
-    
-    res.json({
-      status: 'success',
-      message: 'Message sent to group successfully',
-      data: result
-    });
-  } catch (error) {
-    console.error('Error sending message to group:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to send message to group',
-      error: error.message
-    });
-  }
-});
+// NOTE: a duplicate `POST /groups/:groupId/send-message` handler used to live
+// here — unreachable for the same reason as the ones removed above.
 
 // Get group invite link
 router.get('/groups/:groupId/invite', authenticateToken, async (req, res) => {

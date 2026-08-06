@@ -639,7 +639,7 @@ const Login = () => {
             border: isDarkMode ? `1px solid ${theme.palette.divider}` : 'none',
             transition: 'all 0.3s ease'
           }}>
-            <Typography 
+            {/* <Typography 
               variant="caption" 
               sx={{ 
                 color: isDarkMode ? theme.palette.text.secondary : 'textSecondary',
@@ -669,7 +669,7 @@ const Login = () => {
               }}
             >
               Password: admin@123
-            </Typography>
+            </Typography> */}
           </Box>
         </Paper>
       </Box>
