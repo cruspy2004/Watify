@@ -1,333 +1,352 @@
-SINCE IT IS A B2B APP IT ONLY WORKS ON WATEENS IP but to get a feel of what the product is you can use the vercel link 
+<div align="center">
 
-# 📱 Watify - WhatsApp Business Automation Platform
+<img src="frontend/public/watify-main-img.png" alt="Watify" width="420">
 
-A powerful full-stack application for WhatsApp business automation, group management, and bulk messaging using WhatsApp Web integration.
+# Watify
 
-## 🚀 Features
+**WhatsApp Business Automation Platform**
 
-- **WhatsApp Web Integration**: Connect and manage your WhatsApp account programmatically
-- **Group Management**: View and manage your WhatsApp groups
-- **Bulk Messaging**: Send messages to multiple contacts with rate limiting
-- **User Authentication**: Secure JWT-based authentication system
-- **Member Management**: Manage group members with Excel import/export
-- **Real-time Status**: Monitor WhatsApp connection status and health
-- **Responsive UI**: Modern React interface with Material-UI components
+Group management, bulk messaging, and campaign tracking on top of WhatsApp Web.
 
-## �️ Tech Stack
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.18-000000?style=flat-square&logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-12+-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![MUI](https://img.shields.io/badge/MUI-7-007FFF?style=flat-square&logo=mui&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
-### Backend
-- **Node.js** with **Express.js** framework
-- **PostgreSQL** database with **pg** driver
-- **WhatsApp Web.js** for WhatsApp integration
-- **JWT** for authentication
-- **bcryptjs** for password hashing
-- **Puppeteer** for browser automation
+</div>
 
-### Frontend
-- **React** with hooks and context
-- **Material-UI (MUI)** for UI components
-- **Axios** for API communication
-- **React Router** for navigation
+---
 
-## 📁 Project Structure
+> **Access note.** This is a B2B product deployed behind Wateen's IP allowlist, so
+> the hosted instance is not reachable from the public internet. Run it locally
+> with the instructions below to try it.
+
+## Overview
+
+Watify drives a real WhatsApp account programmatically through `whatsapp-web.js`.
+An Express API owns the session, exposes group and messaging operations, and
+persists everything to PostgreSQL. A React dashboard handles authentication, QR
+pairing, group browsing, and bulk sends.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Client["React Dashboard"]
+        UI["Pages and Components"]
+        AX["Axios API client"]
+        UI --> AX
+    end
+
+    subgraph API["Express API"]
+        MW["JWT auth middleware"]
+        RT["Routes"]
+        CT["Controllers"]
+        MD["Models"]
+        MW --> RT --> CT --> MD
+    end
+
+    subgraph WA["WhatsApp Layer"]
+        SV["whatsappService"]
+        BUS["Event bus"]
+        PUP["whatsapp-web.js on Puppeteer"]
+        SV --> BUS
+        SV --> PUP
+    end
+
+    DB[("PostgreSQL")]
+    WEB(["web.whatsapp.com"])
+
+    AX -->|"REST + Bearer token"| MW
+    CT --> SV
+    MD --> DB
+    PUP -->|"session"| WEB
+    BUS -->|"status, QR, messages"| CT
+```
+
+## Features
+
+- **WhatsApp Web integration** with persistent session and QR pairing
+- **Group management** for browsing, creating, editing, and inspecting groups
+- **Bulk messaging** with a configurable delay between sends and retry backoff
+- **Member management** including Excel import and export
+- **Campaigns** with per-recipient delivery tracking
+- **JWT authentication** with bcrypt password hashing
+- **Connection health** reporting via an event bus rather than polling
+
+## Connection flow
+
+Pairing is the part most worth understanding, because the session is long-lived
+and the QR is only valid briefly.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant R as React app
+    participant A as Express API
+    participant S as whatsappService
+    participant W as WhatsApp Web
+
+    U->>R: Open WhatsApp section
+    R->>A: GET /api/whatsapp/status
+    A->>S: read current state
+    S-->>A: disconnected
+    A-->>R: status disconnected
+
+    R->>A: POST /api/whatsapp/initialize
+    A->>S: initialize client
+    S->>W: launch Puppeteer session
+    W-->>S: qr event
+    S-->>A: emit qr
+    R->>A: GET /api/whatsapp/qr
+    A-->>R: QR payload
+    U->>W: Scan with phone
+
+    W-->>S: ready event
+    S-->>A: emit ready
+    R->>A: GET /api/whatsapp/status
+    A-->>R: status connected
+    R->>A: GET /api/whatsapp/groups
+    A->>S: fetch chats
+    S-->>A: group list
+    A-->>R: groups
+```
+
+## Data model
+
+Core tables and the relationships actually declared in the migrations:
+
+```mermaid
+erDiagram
+    users ||--o{ whatsapp_groups : "creates"
+    users ||--o{ subscribers : "creates"
+    users ||--o{ messages : "sends"
+    users ||--o{ campaigns : "creates"
+    subscribers ||--o{ messages : "receives"
+    whatsapp_groups ||--o{ messages : "targets"
+    campaigns ||--o{ campaign_recipients : "expands to"
+    subscribers ||--o{ campaign_recipients : "listed in"
+    messages ||--o{ campaign_recipients : "delivered as"
+    whatsapp_groups_extended ||--o{ group_members : "contains"
+
+    users {
+        int id PK
+        string name
+        string email UK
+        string password
+        string role
+        bool active
+    }
+    whatsapp_groups {
+        int id PK
+        int admin_user_id FK
+        int created_by FK
+    }
+    subscribers {
+        int id PK
+        int created_by FK
+    }
+    messages {
+        int id PK
+        int subscriber_id FK
+        int group_id FK
+        int sender_id FK
+    }
+    campaigns {
+        int id PK
+        int created_by FK
+    }
+    campaign_recipients {
+        int id PK
+        int campaign_id FK
+        int subscriber_id FK
+        int message_id FK
+    }
+    group_members {
+        int id PK
+        int group_id FK
+    }
+```
+
+Migrations live in `backend/migrations/`, each with a matching rollback in
+`backend/migrations/rollbacks/`.
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Runtime | Node.js 18+ |
+| API | Express 4, Helmet, CORS |
+| Database | PostgreSQL 12+ via `pg` |
+| WhatsApp | `whatsapp-web.js` on Puppeteer |
+| Auth | JSON Web Tokens, bcryptjs |
+| Frontend | React 19, Material UI 7, React Router 7 |
+| Data fetching | Axios, TanStack Query |
+| Spreadsheets | SheetJS (`xlsx`) |
+
+## Project structure
 
 ```
-watify/
+Watify/
 ├── backend/
-│   ├── config/          # Database and WhatsApp configuration
-│   ├── controllers/     # API route controllers
-│   ├── middleware/      # Authentication middleware
-│   ├── migrations/      # Database migration scripts
-│   ├── models/          # Database models
-│   ├── routes/          # API routes
-│   ├── services/        # WhatsApp and other services
-│   └── server.js        # Main server file
+│   ├── config/          Database, app, and WhatsApp client configuration
+│   ├── controllers/     Request handlers
+│   ├── middleware/      JWT verification
+│   ├── migrations/      Schema migrations and rollbacks
+│   ├── models/          Data access layer
+│   ├── routes/          API route definitions
+│   ├── services/        whatsappService and the event bus
+│   ├── scripts/         Migration runner, seeding, diagnostics
+│   └── server.js        Application entry point
 ├── frontend/
-│   ├── public/          # Static assets
+│   ├── public/          Static assets
 │   └── src/
-│       ├── components/  # React components
-│       ├── pages/       # Page components
-│       ├── context/     # React context providers
-│       └── utils/       # Utility functions
-├── package.json         # Root dependencies
-└── README.md           # Project documentation
+│       ├── components/  Auth, messaging, and WhatsApp UI
+│       ├── contexts/    Auth and theme providers
+│       ├── pages/       Home and Dashboard
+│       ├── services/    API clients
+│       └── utils/       Config and validation
+├── landing-page/        Standalone marketing page
+└── scripts/             Local PostgreSQL helpers
 ```
 
-## 🛠️ Installation & Setup
+## Getting started
 
 ### Prerequisites
-- **Node.js** (v16 or higher)
-- **PostgreSQL** (v12 or higher)
-- **Chrome/Chromium** (for WhatsApp Web automation)
 
-### 1. Clone the Repository
+- Node.js 18 or higher
+- PostgreSQL 12 or higher
+- Chrome or Chromium, required by Puppeteer for WhatsApp Web
+
+### Install
+
 ```bash
 git clone https://github.com/cruspy2004/Watify.git
 cd Watify
+npm install
+cd backend && npm install
+cd ../frontend && npm install --legacy-peer-deps
 ```
 
-### 2. Install Dependencies
-```bash
-# Install root dependencies
-npm install
+### Configure
 
-# Install backend dependencies
-cd backend
-npm install
-
-# Install frontend dependencies
-cd ../frontend
-npm install
-```
-
-### 3. Database Setup
-
-Create a PostgreSQL database and update the connection details:
-
-```bash
-# Create database
-createdb wateen_watify
-
-# Run migrations
-cd backend
-npm run migrate
-```
-
-### 4. Environment Configuration
-
-Create `.env` file in the root directory:
+Create a `.env` file in the project root:
 
 ```env
-# Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=wateen_watify
 DB_USER=your_username
 DB_PASSWORD=your_password
 
-# JWT Secret
-JWT_SECRET=your_super_secret_jwt_key_here
+JWT_SECRET=replace_with_a_long_random_secret
+JWT_EXPIRE=7d
 
-# Server Configuration
 PORT=5001
 NODE_ENV=development
-
-# Frontend URL (for CORS)
-FRONTEND_URL=http://localhost:3000
+CLIENT_URL=http://localhost:3000
 ```
 
-### 5. Start the Application
+The frontend proxies to port 5001, so keep `PORT` aligned with it. `backend/server.js`
+falls back to 5000 when `PORT` is unset.
+
+### Create the database
 
 ```bash
-# Start backend server (from root directory)
-npm run dev:backend
-
-# Start frontend (in a new terminal, from root directory)
-npm run dev:frontend
-
-# Or start both concurrently
-npm run dev
+createdb wateen_watify
+npm run migrate
 ```
 
-## 📱 WhatsApp Setup
+### Run
 
-1. **Start the Backend**: The backend must be running first
-2. **Login to Web Interface**: Go to `http://localhost:3000` and login
-3. **Scan QR Code**: Navigate to WhatsApp section and scan the QR code with your WhatsApp mobile app
-4. **Wait for Connection**: The system will connect and fetch your groups automatically
+```bash
+npm run dev:backend
+npm run dev:frontend
+```
 
-## 🔑 Default Login Credentials
+The dashboard is served at `http://localhost:3000`.
 
-- **Email**: Create your account through the registration process
-- **Password**: Set during registration
-## 📊 API Endpoints
+## Pairing WhatsApp
+
+1. Start the backend first, so the session manager is live.
+2. Sign in to the dashboard and open the WhatsApp section.
+3. Scan the QR code with the WhatsApp mobile app.
+4. Groups are fetched automatically once the client reports ready.
+
+The session is cached in `.wwebjs_auth/`, so subsequent starts reconnect without a
+new scan. Delete that directory to force re-pairing.
+
+## API
 
 ### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/auth/profile` - Get user profile
 
-### WhatsApp Management
-- `GET /api/whatsapp/status` - Get WhatsApp connection status
-- `GET /api/whatsapp/qr` - Get QR code for authentication
-- `GET /api/whatsapp/groups` - Get all WhatsApp groups
-- `POST /api/whatsapp/send-message` - Send single message
-- `POST /api/whatsapp/send-to-group` - Send bulk messages to group
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/auth/register` | Create an account |
+| POST | `/api/auth/login` | Obtain a JWT |
+| GET | `/api/auth/profile` | Current user, requires bearer token |
 
-### Group Management
-- `GET /api/groups` - Get all groups with pagination
-- `POST /api/groups` - Create new group
-- `PUT /api/groups/:id` - Update group
-- `DELETE /api/groups/:id` - Delete group
+### WhatsApp
 
-## 🔧 Development
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/whatsapp/status` | Connection state |
+| GET | `/api/whatsapp/qr` | Current pairing QR |
+| GET | `/api/whatsapp/groups` | Groups from the live session |
+| POST | `/api/whatsapp/send-message` | Send a single message |
+| POST | `/api/whatsapp/send-to-group` | Bulk send to a group |
 
-### Running Tests
-```bash
-# Backend tests
-cd backend
-npm test
+### Resources
 
-# Frontend tests
-cd frontend
-npm test
-```
+`/api/groups`, `/api/whatsapp-groups`, `/api/subscribers`, `/api/messages`,
+`/api/campaigns`, and `/api/analytics` expose standard list, create, update, and
+delete operations.
 
-### Database Migrations
-```bash
-# Run migrations
-cd backend
-npm run migrate
+Protected routes expect an `Authorization: Bearer <token>` header.
 
-# Rollback migrations
-npm run migrate:rollback
-```
+## Scripts
 
-## 🚀 Deployment
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the API with nodemon |
+| `npm run dev:frontend` | Start the React dev server |
+| `npm run migrate` | Apply pending migrations |
+| `npm run migrate:status` | Show migration state |
+| `npm run migrate:rollback` | Roll back the last migration |
+| `npm run db:init` | Initialise the database |
+| `npm run db:reset` | Drop and recreate schema |
+| `npm run whatsapp:check` | Verify WhatsApp session health |
+| `npm run whatsapp:clean` | Clear the cached session |
+| `npm run build` | Production build of the frontend |
 
-### Using Docker (Recommended)
-```bash
-# Build and run with Docker Compose
-docker-compose up --build -d
-```
+## Security
 
-### Manual Deployment
-1. Set `NODE_ENV=production` in environment
-2. Build frontend: `cd frontend && npm run build`
-3. Configure PostgreSQL production database
-4. Set up reverse proxy (nginx recommended)
-5. Configure SSL certificates
-6. Start with PM2: `pm2 start backend/server.js`
+- JWT authentication with bcrypt password hashing
+- Helmet security headers and CORS configured for the client origin
+- Parameterised queries throughout the data layer
+- Secrets read from the environment; `.env` files are gitignored
+- Debug endpoints are restricted outside development
 
-## �️ Security Features
+## Deployment
 
-- JWT-based authentication
-- Password hashing with bcrypt
-- CORS protection
-- Helmet security headers
-- Rate limiting for API endpoints
-- Input validation and sanitization
+The backend runs anywhere Node and Chromium are available. `render.yaml` on the
+`deploy` branch contains a working Render configuration.
 
-## 📝 Contributing
+1. Set `NODE_ENV=production` and provide `DATABASE_URL`.
+2. Build the frontend with `npm run build`.
+3. Serve the API behind a reverse proxy with TLS terminated upstream.
+4. Ensure Chromium is installed for Puppeteer.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Supabase connections may need an IPv4 host; see `RENDER_IPV6_FIX.md`.
 
-## 📄 License
+## Commit history
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The commit history in this repository was reconstructed from editor snapshots and
+the original commits. [HISTORY.md](HISTORY.md) explains the sources, the method,
+and its limits.
 
-## 🆘 Support
+## License
 
-If you encounter any issues:
-
-1. Check the [Issues](https://github.com/cruspy2004/Watify/issues) page
-2. Create a new issue with detailed information
-3. Include logs and error messages
-
-## 🔗 Links
-
-- **Live Demo**: [Coming Soon]
-- **Documentation**: [API Documentation](https://github.com/cruspy2004/Watify/wiki)
-- **Support**: [Issues Page](https://github.com/cruspy2004/Watify/issues)
-
----
-
-**⭐ Star this repository if you find it helpful!**
-
-Built with ❤️ by [cruspy2004](https://github.com/cruspy2004)
-  "password": "password123"
-}
-```
-
-#### Get Profile (Protected)
-```bash
-GET /api/auth/profile
-Authorization: Bearer YOUR_JWT_TOKEN
-```
-
-## 🧪 Testing
-
-```bash
-# Run tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-```
-
-## 📜 Available Scripts
-
-- `npm start` - Start production server
-- `npm run dev` - Start development server with nodemon
-- `npm test` - Run tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run client` - Start React frontend (when set up)
-- `npm run server` - Alias for `npm run dev`
-- `npm run build` - Build React frontend (when set up)
-
-## 🔐 Security Features
-
-- **JWT Authentication** with secure token generation
-- **Password Hashing** using bcryptjs with salt rounds
-- **CORS Protection** configured for frontend URL
-- **Helmet** for security headers
-- **Input Validation** on all endpoints
-- **SQL Injection Protection** using parameterized queries
-
-## 🗄️ Database Schema
-
-### Users Table
-```sql
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  role VARCHAR(50) DEFAULT 'user',
-  active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-## 🚧 Next Steps
-
-1. **Set up React Frontend**:
-   ```bash
-   cd frontend
-   npx create-react-app . --template typescript  # or without typescript
-   ```
-
-2. **Add More Features**:
-   - User roles and permissions
-   - Password reset functionality
-   - Email verification
-   - File upload capabilities
-   - Admin panel
-
-3. **Production Deployment**:
-   - Set up environment variables for production
-   - Configure PostgreSQL for production
-   - Set up CI/CD pipeline
-   - Deploy to cloud platforms (Heroku, AWS, etc.)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new features
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the ISC License.
-
----
-
-**Happy Coding! 🎉** 
+Released under the MIT License. See [LICENSE](LICENSE).
